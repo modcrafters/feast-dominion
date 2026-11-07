@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.modcrafters.minecraft.feastdominion.mixin",
+  "compatibilityLevel": "JAVA_${java_version}",
+  "mixins": [
+    ${extra_mixins}"LivingEntityDrinkMixin",
+    "ServerPlayerDrinkMixin"
+  ],
+  "client": [
+    ${extra_client_mixins}"LivingEntityDrinkAccess",
+    "LocalPlayerDrinkMixin",
+    "DrinkHandMixin",
+    "ClientDrinkMixin",
+    "DrinkBodyMixin",
+    "InventoryBookMixin",
+    "ScreenWidgets",
+    "ContainerOrigin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

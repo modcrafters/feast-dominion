@@ -1,0 +1,25 @@
+Feast Dominion
+
+A little more care for the adventurer behind the hunger bar.
+
+Feast Dominion brings thirst and a wellbeing overview to Minecraft, with a vanilla-style HUD and a hands-on way to drink from the world.
+
+Drink straight from the water
+
+With an empty main hand, hold right-click for two seconds on a block face with water beside it. Your hand reaches out, scoops, and rises toward your mouth, with animations in both first and third person. Release early to cancel. No bottle or crafted container is needed.
+
+Fresh water restores three thirst droplets. Water in ocean and beach biomes is salty and costs three droplets instead.
+
+Keep wellbeing close at hand
+
+A compact thirst bar sits above hunger, while a green wellbeing bar sits above your hearts. Both use crisp, vanilla-sized sprites. Open the wellbeing book beside the inventory's recipe book to see your thirst and the seven food groups: meat, dairy, eggs, grain, vegetables, fruit, and legumes.
+
+Early development
+
+The current build includes drinking, saved thirst, the HUD, and the wellbeing book. Food-group bands currently remain at their starting middle level. Taste preferences, meal tracking, diet bonuses and penalties, and automatic thirst drain are planned features, not active mechanics yet.
+
+Compatibility
+
+Minecraft 26.3: Fabric and NeoForge.
+Minecraft 1.21.1: NeoForge.
+Fabric builds require Fabric API. Install the matching build on both the client and server for multiplayer.
