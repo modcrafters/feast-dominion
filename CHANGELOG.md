@@ -8,6 +8,8 @@ After publishing, the action commits the next development version and changelog 
 
 ## Unreleased
 
+## 0.0.1-alpha
+
 - Thirst drains over half a Minecraft day. Wet places are slower. Deserts, badlands, savannas, and the Nether are faster. An empty bar gives Weakness.
 - Hold right-click for two seconds on a block face that has water beside it, with an empty hand. The hand reaches to the water, then comes up to your mouth. Fresh water raises thirst by three droplets. Sea and shore water lowers it by the same. Letting go early stops the drink.
 - A thirst bar sits just above hunger. A new life starts with it full.
