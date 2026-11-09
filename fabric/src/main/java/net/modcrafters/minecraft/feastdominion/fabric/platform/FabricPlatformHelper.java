@@ -10,4 +10,9 @@ public class FabricPlatformHelper implements PlatformHelper {
     public Path configDirectory() {
         return FabricLoader.getInstance().getConfigDir();
     }
+
+    @Override
+    public boolean modLoaded(String id) {
+        return FabricLoader.getInstance().isModLoaded(id);
+    }
 }

@@ -29,10 +29,26 @@ repositories {
     }
 }
 
+configurations {
+    // Copied into the AppleSkin run directory, not onto the shared runtime classpath.
+    appleSkinRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+
+def appleSkinMods = layout.projectDirectory.dir('runs/client-appleskin/mods')
+tasks.register('syncAppleSkin', Sync) {
+    from(configurations.appleSkinRuntime)
+    into(appleSkinMods)
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft_version}")
     implementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
     implementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
+    appleSkinRuntime "maven.modrinth:appleskin:${appleskin_version}"
 
     // Dev runs only. Loom's localRuntime is not on the compile classpath and is not published.
     // Minecraft 26.3 is unobfuscated, so there is no modLocalRuntime configuration.
@@ -57,6 +73,13 @@ loom {
             programArgs '--width', '1920', '--height', '1080'
             runDir('runs/client')
         }
+        clientAppleSkin {
+            client()
+            setConfigName('Fabric Client AppleSkin')
+            ideConfigGenerated(true)
+            programArgs '--width', '1920', '--height', '1080'
+            runDir('runs/client-appleskin')
+        }
         server {
             server()
             setConfigName('Fabric Server')
@@ -80,6 +103,10 @@ loom {
             runDir('runs/clientGametest')
         }
     }
+}
+
+tasks.named('runClientAppleSkin') {
+    dependsOn tasks.named('syncAppleSkin')
 }
 
 // Implement mcgradleconventions loader attribute
