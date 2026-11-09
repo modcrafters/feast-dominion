@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
     ${extra_mixins}"LivingEntityDrinkMixin",
-    "ServerPlayerDrinkMixin"
+    "ServerPlayerDrinkMixin",
+    "PeacefulFoodMixin",
+    "PeacefulFillMixin"
   ],
   "client": [
     ${extra_client_mixins}"LivingEntityDrinkAccess",
@@ -15,7 +17,10 @@
     "DrinkBodyMixin",
     "InventoryBookMixin",
     "ScreenWidgets",
-    "ContainerOrigin"
+    "ContainerOrigin",
+    "FoodBarMixin",
+    "FoodTooltipMixin",
+    "SaturationTooltipMixin"
   ],
   "server": [],
   "injectors": {

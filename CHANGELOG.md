@@ -8,6 +8,10 @@ After publishing, the action commits the next development version and changelog 
 
 ## Unreleased
 
+- Peaceful difficulty keeps spending thirst, hunger, and saturation. Healing continues while you have food. An empty stomach damages you down to five hearts. Set `drain_in_peaceful` to false in `config/feast_dominion.properties` for vanilla peaceful, where thirst holds still, hunger and saturation fill back up, and an empty stomach does no harm.
+- Food tooltips show how much hunger and saturation a food restores, when AppleSkin is not installed. Hunger uses food icons, two points each. Saturation draws an outline on those icons and continues when it fills more icons than the hunger does. A leftover that does not fill an icon is half an outline. Saturation past a full bar, 20 points, adds a larger outline on top of the icons.
+- Saturation shows on the hunger shanks, and stays current as it changes, when AppleSkin is not installed.
+
 ## 0.0.1-alpha
 
 - Thirst drains over half a Minecraft day. Wet places are slower. Deserts, badlands, savannas, and the Nether are faster. An empty bar gives Weakness.

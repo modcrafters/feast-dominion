@@ -4,4 +4,6 @@ import java.nio.file.Path;
 
 public interface PlatformHelper {
     Path configDirectory();
+
+    boolean modLoaded(String id);
 }

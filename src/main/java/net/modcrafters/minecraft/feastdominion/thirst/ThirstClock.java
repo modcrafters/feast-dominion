@@ -1,7 +1,10 @@
 package net.modcrafters.minecraft.feastdominion.thirst;
 
+import net.modcrafters.minecraft.feastdominion.FeastConfig;
+import net.modcrafters.minecraft.feastdominion.PeacefulRules;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
@@ -19,6 +22,12 @@ public final class ThirstClock {
 
     public static void tick(ServerPlayer player) {
         if (player.isCreative() || player.isSpectator()) {
+            return;
+        }
+        if (!PeacefulRules.thirstDrains(
+                FeastConfig.drainInPeaceful(),
+                player.level().getDifficulty() == Difficulty.PEACEFUL
+        )) {
             return;
         }
         ThirstLevel saved = Services.THIRST.level(player);
