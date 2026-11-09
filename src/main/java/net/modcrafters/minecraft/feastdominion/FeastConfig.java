@@ -1,5 +1,7 @@
 package net.modcrafters.minecraft.feastdominion;
 
+import net.modcrafters.minecraft.feastdominion.feature.HealthSettings;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,20 +10,40 @@ import java.nio.file.Path;
 public final class FeastConfig {
     public static final String FILE_NAME = "feast_dominion.properties";
     static final String KEY = "drain_in_peaceful";
+    static final String FLOOR = "health_floor_hearts";
+    static final String CEILING = "health_ceiling_hearts";
+    static final String WEIGHT_DAY = "health_weight_day";
+    static final String WEIGHT_WEEK = "health_weight_week";
+    static final String WEIGHT_MONTH = "health_weight_month";
     private static final String TEMPLATE = """
             # Peaceful difficulty.
             # true: thirst, hunger, and saturation keep falling. An empty stomach damages you down to five hearts.
             # false: vanilla. Thirst holds still, and hunger and saturation fill back up.
             drain_in_peaceful=true
             """;
+    private static final String HEALTH_TEMPLATE = """
+            # Max health when Spice of Life: Carrot Edition is not installed.
+            # Floor and ceiling are hearts. Weights are whole numbers for the day, the week, and the month.
+            # A full set of windows is worth the sum of the weights.
+            health_floor_hearts=7.5
+            health_ceiling_hearts=20
+            health_weight_day=50
+            health_weight_week=30
+            health_weight_month=20
+            """;
 
     private static volatile boolean drainInPeaceful = true;
+    private static volatile HealthSettings health = HealthSettings.DEFAULT;
 
     private FeastConfig() {
     }
 
     public static boolean drainInPeaceful() {
         return drainInPeaceful;
+    }
+
+    public static HealthSettings health() {
+        return health;
     }
 
     public static void load(Path directory) {
@@ -33,11 +55,15 @@ public final class FeastConfig {
             }
             String text = Files.readString(file);
             if (!text.contains(KEY)) {
-                String suffix = text.endsWith("\n") ? TEMPLATE : "\n" + TEMPLATE;
-                Files.writeString(file, text + suffix);
-                text = Files.readString(file);
+                text = append(text, TEMPLATE);
+                Files.writeString(file, text);
+            }
+            if (!text.contains(FLOOR)) {
+                text = append(text, HEALTH_TEMPLATE);
+                Files.writeString(file, text);
             }
             drainInPeaceful = parse(text);
+            health = healthSettings(text);
         } catch (IOException e) {
             drainInPeaceful = true;
             Constants.LOG.error("Could not read {}. Peaceful difficulty keeps spending thirst and hunger.", FILE_NAME, e);
@@ -67,5 +93,71 @@ public final class FeastConfig {
             }
         }
         return value;
+    }
+
+    static HealthSettings healthSettings(String text) {
+        Double floor = null;
+        Double ceiling = null;
+        Integer day = null;
+        Integer week = null;
+        Integer month = null;
+        for (String raw : text.split("\n", -1)) {
+            String line = raw.strip();
+            if (line.isEmpty() || line.startsWith("#") || line.indexOf('=') < 0) {
+                continue;
+            }
+            int split = line.indexOf('=');
+            String key = line.substring(0, split).strip();
+            String setting = line.substring(split + 1).strip();
+            switch (key) {
+                case FLOOR -> floor = hearts(key, setting, floor);
+                case CEILING -> ceiling = hearts(key, setting, ceiling);
+                case WEIGHT_DAY -> day = weight(key, setting, day);
+                case WEIGHT_WEEK -> week = weight(key, setting, week);
+                case WEIGHT_MONTH -> month = weight(key, setting, month);
+                default -> {
+                }
+            }
+        }
+        HealthSettings defaults = HealthSettings.DEFAULT;
+        return new HealthSettings(
+                floor == null ? defaults.floor() : floor,
+                ceiling == null ? defaults.ceiling() : ceiling,
+                day == null ? defaults.dayWeight() : day,
+                week == null ? defaults.weekWeight() : week,
+                month == null ? defaults.monthWeight() : month
+        );
+    }
+
+    private static String append(String text, String block) {
+        return text.endsWith("\n") ? text + block : text + "\n" + block;
+    }
+
+    private static Double hearts(String key, String setting, Double current) {
+        try {
+            double value = Double.parseDouble(setting);
+            if (Double.isFinite(value)) {
+                return value;
+            }
+        } catch (NumberFormatException ignored) {
+            // The message below covers this.
+        }
+        Constants.LOG.warn("Bad {} value '{}'. Keeping the previous number.", key, setting);
+        return current;
+    }
+
+    private static Integer weight(String key, String setting, Integer current) {
+        if (!setting.isEmpty() && setting.charAt(0) != '-' && setting.indexOf('.') < 0) {
+            try {
+                int value = Integer.parseInt(setting);
+                if (value >= 0) {
+                    return value;
+                }
+            } catch (NumberFormatException ignored) {
+                // The message below covers this.
+            }
+        }
+        Constants.LOG.warn("Bad {} value '{}'. A weight is a whole number, zero or more.", key, setting);
+        return current;
     }
 }

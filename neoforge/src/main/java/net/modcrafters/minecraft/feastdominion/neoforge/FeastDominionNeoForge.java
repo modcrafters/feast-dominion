@@ -3,8 +3,12 @@ package net.modcrafters.minecraft.feastdominion.neoforge;
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.FeastDominion;
 import net.modcrafters.minecraft.feastdominion.neoforge.client.FeastDominionNeoForgeClient;
+import net.modcrafters.minecraft.feastdominion.feature.VarietySync;
+import net.modcrafters.minecraft.feastdominion.feature.VarietyView;
+import net.modcrafters.minecraft.feastdominion.neoforge.platform.NeoForgeDietStore;
 import net.modcrafters.minecraft.feastdominion.neoforge.platform.NeoForgeThirstStore;
 import net.modcrafters.minecraft.feastdominion.network.SaturationPayload;
+import net.modcrafters.minecraft.feastdominion.network.VarietyPayload;
 import net.modcrafters.minecraft.feastdominion.network.SaturationSync;
 import net.modcrafters.minecraft.feastdominion.thirst.Drinking;
 import net.modcrafters.minecraft.feastdominion.thirst.ThirstClock;
@@ -26,6 +30,7 @@ public class FeastDominionNeoForge {
     public FeastDominionNeoForge(IEventBus modBus) {
         modBus.addListener(FeastDominionNeoForge::registerPayloads);
         NeoForgeThirstStore.ATTACHMENTS.register(modBus);
+        NeoForgeDietStore.ATTACHMENTS.register(modBus);
         NeoForge.EVENT_BUS.addListener(FeastDominionNeoForge::onUseBlock);
         NeoForge.EVENT_BUS.addListener(FeastDominionNeoForge::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(FeastDominionNeoForge::onLogout);
@@ -39,12 +44,18 @@ public class FeastDominionNeoForge {
     }
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar(Constants.MOD_ID).playToClient(
-                SaturationPayload.TYPE,
-                SaturationPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() ->
-                        context.player().getFoodData().setSaturation(payload.saturation()))
-        );
+        event.registrar(Constants.MOD_ID)
+                .playToClient(
+                        SaturationPayload.TYPE,
+                        SaturationPayload.STREAM_CODEC,
+                        (payload, context) -> context.enqueueWork(() ->
+                                context.player().getFoodData().setSaturation(payload.saturation()))
+                )
+                .playToClient(
+                        VarietyPayload.TYPE,
+                        VarietyPayload.STREAM_CODEC,
+                        (payload, context) -> context.enqueueWork(() -> VarietyView.set(payload.snapshot()))
+                );
     }
 
     private static void onUseBlock(PlayerInteractEvent.RightClickBlock event) {
@@ -76,6 +87,7 @@ public class FeastDominionNeoForge {
         if (event.getEntity() instanceof ServerPlayer player) {
             ThirstClock.save(player);
             SaturationSync.forget(player);
+            VarietySync.forget(player);
         }
     }
 }

@@ -7,7 +7,9 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudStatusBarHeightRegistr
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.modcrafters.minecraft.feastdominion.client.ThirstHud;
 import net.modcrafters.minecraft.feastdominion.client.WellnessHud;
+import net.modcrafters.minecraft.feastdominion.feature.VarietyView;
 import net.modcrafters.minecraft.feastdominion.network.SaturationPayload;
+import net.modcrafters.minecraft.feastdominion.network.VarietyPayload;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -21,6 +23,9 @@ public class FeastDominionFabricClient implements ClientModInitializer {
                 context.client().player.getFoodData().setSaturation(payload.saturation());
             }
         }));
+        ClientPlayNetworking.registerGlobalReceiver(VarietyPayload.TYPE, (payload, context) -> context.client().execute(() ->
+                VarietyView.set(payload.snapshot())
+        ));
         HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, ThirstHud.ID, FeastDominionFabricClient::renderThirst);
         HudStatusBarHeightRegistry.addRight(ThirstHud.ID, ThirstHud::barHeight);
         HudElementRegistry.attachElementAfter(VanillaHudElements.HEALTH_BAR, WellnessHud.ID, FeastDominionFabricClient::renderWellness);
