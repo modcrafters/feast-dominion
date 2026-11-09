@@ -8,6 +8,7 @@ After publishing, the action commits the next development version and changelog 
 
 ## Unreleased
 
+- Without Spice of Life: Carrot Edition, max health follows what you have eaten and drunk lately. Dying keeps that memory. Nothing remembered is 7.5 hearts. Three different foods or drinks today, ten this week, and twenty this month reach 20 hearts. The wellbeing book has a second page for those counts. With Spice of Life installed, that mod keeps the health bar and the page stays away.
 - Peaceful difficulty keeps spending thirst, hunger, and saturation. Healing continues while you have food. An empty stomach damages you down to five hearts. Set `drain_in_peaceful` to false in `config/feast_dominion.properties` for vanilla peaceful, where thirst holds still, hunger and saturation fill back up, and an empty stomach does no harm.
 - Food tooltips show how much hunger and saturation a food restores, when AppleSkin is not installed. Hunger uses food icons, two points each. Saturation draws an outline on those icons and continues when it fills more icons than the hunger does. A leftover that does not fill an icon is half an outline. Saturation past a full bar, 20 points, adds a larger outline on top of the icons.
 - Saturation shows on the hunger shanks, and stays current as it changes, when AppleSkin is not installed.

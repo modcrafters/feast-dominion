@@ -27,6 +27,17 @@ repositories {
             includeGroup 'maven.modrinth'
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'CurseMaven'
+                url = 'https://cursemaven.com'
+            }
+        }
+        filter {
+            includeGroup 'curse.maven'
+        }
+    }
 }
 
 // On the dev runtime classpath only. Not compiled against and not published.
@@ -42,6 +53,13 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    // Copied into the Spice of Life runs. Not on the shared runtime classpath, so the
+    // plain client run stays without it.
+    solCarrotRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
 }
 configurations.named('runtimeClasspath') {
     extendsFrom(configurations.localRuntime)
@@ -53,11 +71,24 @@ tasks.register('syncAppleSkin', Sync) {
     into(appleSkinMods)
 }
 
+def solCarrotMods = layout.projectDirectory.dir('runs/client-solcarrot/mods')
+tasks.register('syncSolCarrot', Sync) {
+    from(configurations.solCarrotRuntime)
+    into(solCarrotMods)
+}
+
+def integrationMods = layout.projectDirectory.dir('runs/client-integrations/mods')
+tasks.register('syncIntegrations', Sync) {
+    from(configurations.appleSkinRuntime, configurations.solCarrotRuntime)
+    into(integrationMods)
+}
+
 dependencies {
     localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
     compileOnly "maven.modrinth:jade:${jade_version}+neoforge"
     localRuntime "maven.modrinth:jade:${jade_version}+neoforge"
     appleSkinRuntime "maven.modrinth:appleskin:${appleskin_version}"
+    solCarrotRuntime "curse.maven:spice-of-life-carrot-edition-277616:${solcarrot_file}"
 }
 
 neoForge {
@@ -82,6 +113,18 @@ neoForge {
             programArguments.addAll '--width', '1920', '--height', '1080'
             gameDirectory = this.mkdir(this.file('runs/client-appleskin'))
             taskBefore tasks.named('syncAppleSkin')
+        }
+        clientSolCarrot {
+            client()
+            programArguments.addAll '--width', '1920', '--height', '1080'
+            gameDirectory = this.mkdir(this.file('runs/client-solcarrot'))
+            taskBefore tasks.named('syncSolCarrot')
+        }
+        clientIntegrations {
+            client()
+            programArguments.addAll '--width', '1920', '--height', '1080'
+            gameDirectory = this.mkdir(this.file('runs/client-integrations'))
+            taskBefore tasks.named('syncIntegrations')
         }
         data {
             // clientData() since 1.21.4, data() before (neoforge_data_run in each version's gradle.properties).
@@ -111,17 +154,21 @@ neoForge {
 // IntelliJ's Application run takes its JVM from the module, which inherits the
 // project JDK (21). 26.3's dev VM args include a flag that JVM rejects, so that
 // button never starts. This run is a Gradle task instead, on the Java toolchain.
-neoForge.runs.named('clientAppleSkin') {
-    if (java_version.toInteger() >= 25) {
-        disableIdeRun()
+['clientAppleSkin', 'clientSolCarrot', 'clientIntegrations'].each { runName ->
+    neoForge.runs.named(runName) {
+        if (java_version.toInteger() >= 25) {
+            disableIdeRun()
+        }
     }
 }
 if (java_version.toInteger() >= 25) {
     def gameLauncher = javaToolchains.launcherFor {
         languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(java_version.toInteger()))
     }
-    tasks.named('runClientAppleSkin') {
-        javaLauncher.set(gameLauncher)
+    ['runClientAppleSkin', 'runClientSolCarrot', 'runClientIntegrations'].each { taskName ->
+        tasks.named(taskName) {
+            javaLauncher.set(gameLauncher)
+        }
     }
 }
 

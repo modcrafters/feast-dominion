@@ -7,7 +7,9 @@
     ${extra_mixins}"LivingEntityDrinkMixin",
     "ServerPlayerDrinkMixin",
     "PeacefulFoodMixin",
-    "PeacefulFillMixin"
+    "PeacefulFillMixin",
+    "HealthIncreaseMixin",
+    "FoodMemoryMixin"
   ],
   "client": [
     ${extra_client_mixins}"LivingEntityDrinkAccess",
