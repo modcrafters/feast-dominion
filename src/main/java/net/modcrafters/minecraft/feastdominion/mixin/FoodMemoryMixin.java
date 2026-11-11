@@ -1,6 +1,7 @@
 package net.modcrafters.minecraft.feastdominion.mixin;
 
 import net.modcrafters.minecraft.feastdominion.feature.HealthIncreaseFeature;
+import net.modcrafters.minecraft.feastdominion.wellness.DietClock;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +20,7 @@ public abstract class FoodMemoryMixin {
     private void feast$rememberFood(CallbackInfo ci) {
         if ((Object) this instanceof ServerPlayer player) {
             HealthIncreaseFeature.instance().consume(player, this.useItem);
+            DietClock.eat(player, this.useItem);
         }
     }
 }

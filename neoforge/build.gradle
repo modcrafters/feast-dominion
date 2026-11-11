@@ -60,6 +60,12 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    // Copied into the Farmer's Delight runs. Empty on versions that have no build.
+    delightRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
 }
 configurations.named('runtimeClasspath') {
     extendsFrom(configurations.localRuntime)
@@ -77,11 +83,19 @@ tasks.register('syncSolCarrot', Sync) {
     into(solCarrotMods)
 }
 
+def delightMods = layout.projectDirectory.dir('runs/client-delight/mods')
+tasks.register('syncDelight', Sync) {
+    from(configurations.delightRuntime)
+    into(delightMods)
+}
+
 def integrationMods = layout.projectDirectory.dir('runs/client-integrations/mods')
 tasks.register('syncIntegrations', Sync) {
-    from(configurations.appleSkinRuntime, configurations.solCarrotRuntime)
+    from(configurations.appleSkinRuntime, configurations.solCarrotRuntime, configurations.delightRuntime)
     into(integrationMods)
 }
+
+def farmersDelight = findProperty('farmersdelight_version') ?: ''
 
 dependencies {
     localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
@@ -89,6 +103,9 @@ dependencies {
     localRuntime "maven.modrinth:jade:${jade_version}+neoforge"
     appleSkinRuntime "maven.modrinth:appleskin:${appleskin_version}"
     solCarrotRuntime "curse.maven:spice-of-life-carrot-edition-277616:${solcarrot_file}"
+    if (farmersDelight) {
+        delightRuntime "maven.modrinth:farmers-delight:${farmersDelight}"
+    }
 }
 
 neoForge {
@@ -101,6 +118,7 @@ neoForge {
     runs {
         configureEach {
             systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            systemProperty('feast_dominion.add_debug_commands', 'true')
             ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
         }
         client {
@@ -125,6 +143,14 @@ neoForge {
             programArguments.addAll '--width', '1920', '--height', '1080'
             gameDirectory = this.mkdir(this.file('runs/client-integrations'))
             taskBefore tasks.named('syncIntegrations')
+        }
+        if (farmersDelight) {
+            clientDelight {
+                client()
+                programArguments.addAll '--width', '1920', '--height', '1080'
+                gameDirectory = this.mkdir(this.file('runs/client-delight'))
+                taskBefore tasks.named('syncDelight')
+            }
         }
         data {
             // clientData() since 1.21.4, data() before (neoforge_data_run in each version's gradle.properties).
@@ -154,7 +180,11 @@ neoForge {
 // IntelliJ's Application run takes its JVM from the module, which inherits the
 // project JDK (21). 26.3's dev VM args include a flag that JVM rejects, so that
 // button never starts. This run is a Gradle task instead, on the Java toolchain.
-['clientAppleSkin', 'clientSolCarrot', 'clientIntegrations'].each { runName ->
+def delightRuns = ['clientAppleSkin', 'clientSolCarrot', 'clientIntegrations']
+if (farmersDelight) {
+    delightRuns.add('clientDelight')
+}
+delightRuns.each { runName ->
     neoForge.runs.named(runName) {
         if (java_version.toInteger() >= 25) {
             disableIdeRun()
@@ -165,7 +195,11 @@ if (java_version.toInteger() >= 25) {
     def gameLauncher = javaToolchains.launcherFor {
         languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(java_version.toInteger()))
     }
-    ['runClientAppleSkin', 'runClientSolCarrot', 'runClientIntegrations'].each { taskName ->
+    def delightTasks = ['runClientAppleSkin', 'runClientSolCarrot', 'runClientIntegrations']
+    if (farmersDelight) {
+        delightTasks.add('runClientDelight')
+    }
+    delightTasks.each { taskName ->
         tasks.named(taskName) {
             javaLauncher.set(gameLauncher)
         }

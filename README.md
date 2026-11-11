@@ -15,7 +15,7 @@ IDEA 2025.2 or newer is required for Java 25.
 5. Run one of these configurations:
    - **Fabric Client** or **Fabric Server** (Gradle run configurations)
    - **NeoForge Client** or **NeoForge Server** (Application run configurations)
-   - **NeoForge Client Sol Carrot** loads Spice of Life: Carrot Edition. **NeoForge Client Integrations** loads that mod and AppleSkin. On 1.21.1 these are Application runs. On 26.3 they are the Gradle tasks `runClientSolCarrot` and `runClientIntegrations`.
+   - **NeoForge Client Sol Carrot** loads Spice of Life: Carrot Edition. **NeoForge Client Delight** loads Farmer's Delight. **NeoForge Client Integrations** loads those mods and AppleSkin. Delight is part of the 1.21.1 runs. 26.3 has no Farmer's Delight build, so that run is absent there and the integrations task stays with AppleSkin and Spice of Life. On 1.21.1 these are Application runs. On 26.3 Sol Carrot and Integrations are the Gradle tasks `runClientSolCarrot` and `runClientIntegrations`.
 
 ### How the build is laid out
 

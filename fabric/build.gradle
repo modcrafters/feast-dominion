@@ -66,6 +66,9 @@ loom {
         accessWidenerPath.set(aw)
     }
     runs {
+        configureEach {
+            property('feast_dominion.add_debug_commands', 'true')
+        }
         client {
             client()
             setConfigName('Fabric Client')
