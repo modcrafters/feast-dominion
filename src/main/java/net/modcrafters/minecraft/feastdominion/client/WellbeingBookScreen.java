@@ -6,6 +6,7 @@ import net.modcrafters.minecraft.feastdominion.feature.VarietyView;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
 import net.modcrafters.minecraft.feastdominion.thirst.Thirst;
 import net.modcrafters.minecraft.feastdominion.wellness.DietBand;
+import net.modcrafters.minecraft.feastdominion.wellness.DietMemory;
 import net.modcrafters.minecraft.feastdominion.wellness.FoodGroup;
 import net.modcrafters.minecraft.feastdominion.wellness.Wellness;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -106,8 +107,10 @@ public final class WellbeingBookScreen extends Screen {
         int y = 18;
         graphics.text(this.font, this.title, textX, y, 0, false);
         y += 16;
+        DietMemory diet = DietMemory.start();
         if (this.minecraft != null && this.minecraft.player != null) {
             int thirst = Services.THIRST.points(this.minecraft.player);
+            diet = Services.GROUPS.memory(this.minecraft.player);
             graphics.text(
                     this.font,
                     Component.translatable("feast_dominion.wellbeing.thirst", thirst, Thirst.POINTS),
@@ -120,21 +123,21 @@ public final class WellbeingBookScreen extends Screen {
         y += 14;
         boolean wellFed = true;
         for (FoodGroup group : FoodGroup.values()) {
-            DietBand band = Wellness.band(group);
+            int points = diet.points(group);
+            DietBand band = Wellness.band(points);
             if (band != DietBand.HIGH) {
                 wellFed = false;
             }
+            Component name = Component.translatable("feast_dominion.wellbeing.group." + group.name().toLowerCase());
             Component line = band == DietBand.LOW
                     ? Component.translatable(
                             "feast_dominion.wellbeing.line.low",
-                            Component.translatable("feast_dominion.wellbeing.group." + group.name().toLowerCase()),
+                            name,
+                            points,
+                            Wellness.POINTS,
                             Component.translatable("feast_dominion.wellbeing.trouble." + group.name().toLowerCase())
                     )
-                    : Component.translatable(
-                            "feast_dominion.wellbeing.line",
-                            Component.translatable("feast_dominion.wellbeing.group." + group.name().toLowerCase()),
-                            Component.translatable("feast_dominion.wellbeing.band." + band.name().toLowerCase())
-                    );
+                    : Component.translatable("feast_dominion.wellbeing.line", name, points, Wellness.POINTS);
             graphics.text(this.font, line, textX, y, 0, false);
             y += 10;
         }

@@ -23,6 +23,13 @@ class FeastConfigTest {
     }
 
     @Test
+    void debugCommandsStayOffUnlessAsked() {
+        assertFalse(FeastConfig.debugCommands("# nothing here\n"));
+        assertFalse(FeastConfig.debugCommands("add_debug_commands=false"));
+        assertTrue(FeastConfig.debugCommands("add_debug_commands=TRUE"));
+    }
+
+    @Test
     void aFractionalWeightKeepsTheDefault() {
         HealthSettings settings = FeastConfig.healthSettings("""
                 health_weight_day=50.5

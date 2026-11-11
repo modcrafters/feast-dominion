@@ -15,6 +15,9 @@ public final class FeastConfig {
     static final String WEIGHT_DAY = "health_weight_day";
     static final String WEIGHT_WEEK = "health_weight_week";
     static final String WEIGHT_MONTH = "health_weight_month";
+    static final String DEBUG = "add_debug_commands";
+    /** A run can force the debug command on without editing the properties file. */
+    public static final String DEBUG_PROPERTY = "feast_dominion.add_debug_commands";
     private static final String TEMPLATE = """
             # Peaceful difficulty.
             # true: thirst, hunger, and saturation keep falling. An empty stomach damages you down to five hearts.
@@ -31,8 +34,14 @@ public final class FeastConfig {
             health_weight_week=30
             health_weight_month=20
             """;
+    private static final String DEBUG_TEMPLATE = """
+            # Testing commands. /feast set <hunger> <saturation> <thirst>
+            # true registers the command for operators. A run can set feast_dominion.add_debug_commands=true.
+            add_debug_commands=false
+            """;
 
     private static volatile boolean drainInPeaceful = true;
+    private static volatile boolean debugCommands = false;
     private static volatile HealthSettings health = HealthSettings.DEFAULT;
 
     private FeastConfig() {
@@ -44,6 +53,15 @@ public final class FeastConfig {
 
     public static HealthSettings health() {
         return health;
+    }
+
+    /** The properties file, unless the run set {@link #DEBUG_PROPERTY}. */
+    public static boolean debugCommands() {
+        String override = System.getProperty(DEBUG_PROPERTY);
+        if (override != null) {
+            return override.equalsIgnoreCase("true");
+        }
+        return debugCommands;
     }
 
     public static void load(Path directory) {
@@ -62,7 +80,12 @@ public final class FeastConfig {
                 text = append(text, HEALTH_TEMPLATE);
                 Files.writeString(file, text);
             }
+            if (!text.contains(DEBUG)) {
+                text = append(text, DEBUG_TEMPLATE);
+                Files.writeString(file, text);
+            }
             drainInPeaceful = parse(text);
+            debugCommands = debugCommands(text);
             health = healthSettings(text);
         } catch (IOException e) {
             drainInPeaceful = true;
@@ -83,6 +106,31 @@ public final class FeastConfig {
             }
             String key = line.substring(0, split).strip();
             if (!KEY.equals(key)) {
+                continue;
+            }
+            String setting = line.substring(split + 1).strip();
+            if (setting.equalsIgnoreCase("true")) {
+                value = true;
+            } else if (setting.equalsIgnoreCase("false")) {
+                value = false;
+            }
+        }
+        return value;
+    }
+
+    static boolean debugCommands(String text) {
+        boolean value = false;
+        for (String raw : text.split("\n", -1)) {
+            String line = raw.strip();
+            if (line.isEmpty() || line.startsWith("#")) {
+                continue;
+            }
+            int split = line.indexOf('=');
+            if (split < 0) {
+                continue;
+            }
+            String key = line.substring(0, split).strip();
+            if (!DEBUG.equals(key)) {
                 continue;
             }
             String setting = line.substring(split + 1).strip();

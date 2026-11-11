@@ -1,6 +1,7 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.platform.Services;
 import net.modcrafters.minecraft.feastdominion.wellness.Wellness;
 import net.modcrafters.minecraft.feastdominion.wellness.WellnessIcons;
 import net.minecraft.client.Minecraft;
@@ -31,7 +32,8 @@ public final class WellnessHud {
     }
 
     public static void draw(GuiGraphicsExtractor graphics, int xLeft, int y) {
-        int points = Wellness.median();
+        Player player = Minecraft.getInstance().player;
+        int points = player == null ? Wellness.POINTS / 2 : Services.GROUPS.memory(player).median();
         for (int fromLeft = 0; fromLeft < 10; fromLeft++) {
             int x = xLeft + fromLeft * 8;
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, EMPTY, x, y, 9, 9);

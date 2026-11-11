@@ -6,7 +6,10 @@ import net.modcrafters.minecraft.feastdominion.neoforge.client.FeastDominionNeoF
 import net.modcrafters.minecraft.feastdominion.feature.VarietySync;
 import net.modcrafters.minecraft.feastdominion.feature.VarietyView;
 import net.modcrafters.minecraft.feastdominion.neoforge.platform.NeoForgeDietStore;
+import net.modcrafters.minecraft.feastdominion.neoforge.platform.NeoForgeGroupStore;
 import net.modcrafters.minecraft.feastdominion.neoforge.platform.NeoForgeThirstStore;
+import net.modcrafters.minecraft.feastdominion.debug.DebugCommands;
+import net.modcrafters.minecraft.feastdominion.wellness.DietClock;
 import net.modcrafters.minecraft.feastdominion.network.SaturationPayload;
 import net.modcrafters.minecraft.feastdominion.network.VarietyPayload;
 import net.modcrafters.minecraft.feastdominion.network.SaturationSync;
@@ -20,6 +23,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -31,9 +35,11 @@ public class FeastDominionNeoForge {
         modBus.addListener(FeastDominionNeoForge::registerPayloads);
         NeoForgeThirstStore.ATTACHMENTS.register(modBus);
         NeoForgeDietStore.ATTACHMENTS.register(modBus);
+        NeoForgeGroupStore.ATTACHMENTS.register(modBus);
         NeoForge.EVENT_BUS.addListener(FeastDominionNeoForge::onUseBlock);
         NeoForge.EVENT_BUS.addListener(FeastDominionNeoForge::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(FeastDominionNeoForge::onLogout);
+        NeoForge.EVENT_BUS.addListener(FeastDominionNeoForge::onCommands);
         //? if >=1.21.9 {
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
         //?} else
@@ -79,13 +85,19 @@ public class FeastDominionNeoForge {
     private static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             ThirstClock.tick(player);
+            DietClock.tick(player);
             SaturationSync.tick(player);
         }
+    }
+
+    private static void onCommands(RegisterCommandsEvent event) {
+        DebugCommands.register(event.getDispatcher());
     }
 
     private static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             ThirstClock.save(player);
+            DietClock.save(player);
             SaturationSync.forget(player);
             VarietySync.forget(player);
         }

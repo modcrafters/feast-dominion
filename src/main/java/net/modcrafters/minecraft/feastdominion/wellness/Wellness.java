@@ -11,6 +11,17 @@ public final class Wellness {
 
     /** No meals are remembered yet, so every group sits in the middle. */
     public static DietBand band(FoodGroup group) {
+        return band(POINTS / 2);
+    }
+
+    /** Six and below is low. Fourteen and above is high. The rest is the middle. */
+    public static DietBand band(int points) {
+        if (points <= 6) {
+            return DietBand.LOW;
+        }
+        if (points >= 14) {
+            return DietBand.HIGH;
+        }
         return DietBand.MIDDLE;
     }
 
