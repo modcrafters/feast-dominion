@@ -1,6 +1,7 @@
 package net.modcrafters.minecraft.feastdominion.group;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.food.IngredientTable;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.resources.Resource;
@@ -47,21 +48,8 @@ public final class GroupIndex {
     }
 
     private static Map<String, GroupShares> build(ResourceManager manager) {
-        Map<String, GroupShares> authored = new HashMap<>();
-        manager.listResources("feast/group", path -> path.getPath().endsWith(".json")).forEach((location, resource) -> {
-            String item = itemId(location.getPath());
-            if (item.isEmpty()) {
-                return;
-            }
-            try (Reader reader = resource.openAsReader()) {
-                GroupShares read = GroupFiles.read(reader);
-                if (read.any()) {
-                    authored.put(item, read);
-                }
-            } catch (IOException | RuntimeException ignored) {
-                // A bad file is skipped. The other ingredients still load.
-            }
-        });
+        Map<String, GroupShares> items = readGroups(manager, "feast/group", "feast/group/tag/");
+        Map<String, GroupShares> tagGroups = readGroups(manager, "feast/group/tag", null);
         Map<String, List<String>> rawTags = new HashMap<>();
         manager.listResourceStacks("tags/item", path -> path.getPath().endsWith(".json")).forEach((location, stack) -> {
             String tag = tagId(location.getNamespace(), location.getPath());
@@ -77,7 +65,45 @@ public final class GroupIndex {
                 // One unreadable recipe does not stop the rest.
             }
         });
-        return GroupInference.infer(authored, recipes, GroupTags.flatten(rawTags), hunger());
+        Map<String, List<String>> tags = GroupTags.flatten(rawTags);
+        Map<String, GroupShares> authored = GroupTags.assign(Map.of(), tagGroups, tags, GroupTags.BROAD);
+        IngredientTable.paint(authored, IngredientTable.load(manager).groups(), itemIds());
+        authored.putAll(items);
+        return GroupInference.infer(authored, recipes, tags, hunger());
+    }
+
+    private static Map<String, GroupShares> readGroups(ResourceManager manager, String folder, String skipPrefix) {
+        Map<String, GroupShares> groups = new HashMap<>();
+        manager.listResources(folder, path -> {
+            String full = path.getPath();
+            return full.endsWith(".json") && (skipPrefix == null || !full.startsWith(skipPrefix));
+        }).forEach((location, resource) -> {
+            String id = id(location.getPath(), folder.equals("feast/group") ? "feast/group/" : folder + "/");
+            if (id.isEmpty()) {
+                return;
+            }
+            try (Reader reader = resource.openAsReader()) {
+                GroupShares read = GroupFiles.read(reader);
+                if (read.any()) {
+                    groups.put(id, read);
+                }
+            } catch (IOException | RuntimeException ignored) {
+                // A bad file is skipped. The other ingredients still load.
+            }
+        });
+        return groups;
+    }
+
+    private static String id(String path, String prefix) {
+        if (!path.startsWith(prefix) || !path.endsWith(".json")) {
+            return "";
+        }
+        String body = path.substring(prefix.length(), path.length() - ".json".length());
+        int slash = body.indexOf('/');
+        if (slash <= 0 || slash == body.length() - 1) {
+            return "";
+        }
+        return body.substring(0, slash) + ":" + body.substring(slash + 1);
     }
 
     private static List<String> merged(List<Resource> stack) {
@@ -97,6 +123,14 @@ public final class GroupIndex {
         return values;
     }
 
+    private static List<String> itemIds() {
+        List<String> ids = new ArrayList<>();
+        for (Item item : BuiltInRegistries.ITEM) {
+            ids.add(BuiltInRegistries.ITEM.getKey(item).toString());
+        }
+        return ids;
+    }
+
     private static Map<String, Integer> hunger() {
         Map<String, Integer> hunger = new HashMap<>();
         for (Item item : BuiltInRegistries.ITEM) {
@@ -106,19 +140,6 @@ public final class GroupIndex {
             }
         }
         return hunger;
-    }
-
-    private static String itemId(String path) {
-        String prefix = "feast/group/";
-        if (!path.startsWith(prefix) || !path.endsWith(".json")) {
-            return "";
-        }
-        String body = path.substring(prefix.length(), path.length() - ".json".length());
-        int slash = body.indexOf('/');
-        if (slash <= 0 || slash == body.length() - 1) {
-            return "";
-        }
-        return body.substring(0, slash) + ":" + body.substring(slash + 1);
     }
 
     private static String tagId(String namespace, String path) {

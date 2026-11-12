@@ -1,6 +1,7 @@
 package net.modcrafters.minecraft.feastdominion.taste;
 
 import net.modcrafters.minecraft.feastdominion.group.GroupInference;
+import net.modcrafters.minecraft.feastdominion.group.GroupTags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,24 +41,14 @@ public final class TasteInference {
     }
 
     /**
-     * An item file wins. A tag file seasons every member that does not already have its own taste.
+     * An item file wins. A narrower tag replaces a broad crop tag for the same member.
      */
     public static Map<String, TasteProfile> authored(
             Map<String, TasteProfile> items,
             Map<String, TasteProfile> tagTastes,
             Map<String, List<String>> tagMembers
     ) {
-        Map<String, TasteProfile> known = new HashMap<>();
-        for (Map.Entry<String, TasteProfile> tag : tagTastes.entrySet()) {
-            if (!tag.getValue().any()) {
-                continue;
-            }
-            for (String item : tagMembers.getOrDefault(tag.getKey(), List.of())) {
-                known.putIfAbsent(item, tag.getValue());
-            }
-        }
-        known.putAll(items);
-        return known;
+        return GroupTags.assign(items, tagTastes, tagMembers, GroupTags.BROAD);
     }
 
     private static Map<String, TasteProfile> resolve(

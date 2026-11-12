@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +14,54 @@ import java.util.Set;
 
 /** Item tags as they appear in recipe files, flattened to item ids. */
 public final class GroupTags {
+    /**
+     * Broad crop tags, applied before any narrower tag. Nuts come last so a nut that is also filed under fruits keeps the nut profile.
+     */
+    public static final List<String> BROAD = List.of("c:vegetables", "c:fruits", "c:grain", "c:nuts");
+
     private GroupTags() {
+    }
+
+    /**
+     * A tag file covers every member. A later narrow tag replaces a broad one, and an item file replaces both.
+     */
+    public static <T> Map<String, T> assign(
+            Map<String, T> items,
+            Map<String, T> tagValues,
+            Map<String, List<String>> tagMembers,
+            Collection<String> broadTags
+    ) {
+        Map<String, T> known = new HashMap<>();
+        for (String id : broadTags) {
+            apply(known, id, tagValues, tagMembers);
+        }
+        List<String> rest = new ArrayList<>();
+        for (String id : tagValues.keySet()) {
+            if (!broadTags.contains(id)) {
+                rest.add(id);
+            }
+        }
+        rest.sort(String::compareTo);
+        for (String id : rest) {
+            apply(known, id, tagValues, tagMembers);
+        }
+        known.putAll(items);
+        return known;
+    }
+
+    private static <T> void apply(
+            Map<String, T> known,
+            String id,
+            Map<String, T> tagValues,
+            Map<String, List<String>> tagMembers
+    ) {
+        T value = tagValues.get(id);
+        if (value == null) {
+            return;
+        }
+        for (String item : tagMembers.getOrDefault(id, List.of())) {
+            known.put(item, value);
+        }
     }
 
     public record File(boolean replace, List<String> values) {

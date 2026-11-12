@@ -27,11 +27,28 @@ repositories {
             includeGroup 'maven.modrinth'
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'CurseMaven'
+                url = 'https://cursemaven.com'
+            }
+        }
+        filter {
+            includeGroup 'curse.maven'
+        }
+    }
 }
 
 configurations {
     // Copied into the AppleSkin run directory, not onto the shared runtime classpath.
     appleSkinRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    // Copied into the Croptopia run, together with EpheroLib. Empty when this version has no build.
+    croptopiaRuntime {
         canBeConsumed = false
         canBeResolved = true
         transitive = false
@@ -44,11 +61,24 @@ tasks.register('syncAppleSkin', Sync) {
     into(appleSkinMods)
 }
 
+def croptopiaMods = layout.projectDirectory.dir('runs/client-croptopia/mods')
+tasks.register('syncCroptopia', Sync) {
+    from(configurations.croptopiaRuntime)
+    into(croptopiaMods)
+}
+
+def croptopia = findProperty('croptopia_file') ?: ''
+def epherolib = findProperty('epherolib_file') ?: ''
+
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft_version}")
     implementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
     implementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
     appleSkinRuntime "maven.modrinth:appleskin:${appleskin_version}"
+    if (croptopia && epherolib) {
+        croptopiaRuntime "curse.maven:croptopia-415438:${croptopia}"
+        croptopiaRuntime "curse.maven:epherolib-885449:${epherolib}"
+    }
 
     // Dev runs only. Loom's localRuntime is not on the compile classpath and is not published.
     // Minecraft 26.3 is unobfuscated, so there is no modLocalRuntime configuration.
@@ -83,6 +113,15 @@ loom {
             programArgs '--width', '1920', '--height', '1080'
             runDir('runs/client-appleskin')
         }
+        if (croptopia && epherolib) {
+            clientCroptopia {
+                client()
+                setConfigName('Fabric Client Croptopia')
+                ideConfigGenerated(true)
+                programArgs '--width', '1920', '--height', '1080'
+                runDir('runs/client-croptopia')
+            }
+        }
         server {
             server()
             setConfigName('Fabric Server')
@@ -110,6 +149,12 @@ loom {
 
 tasks.named('runClientAppleSkin') {
     dependsOn tasks.named('syncAppleSkin')
+}
+
+if (croptopia && epherolib) {
+    tasks.named('runClientCroptopia') {
+        dependsOn tasks.named('syncCroptopia')
+    }
 }
 
 // Implement mcgradleconventions loader attribute

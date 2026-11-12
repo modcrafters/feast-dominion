@@ -67,6 +67,26 @@ class TasteInferenceTest {
     }
 
     @Test
+    void aNutTagReplacesTheFruitTasteAndAnItemReplacesBoth() {
+        Map<String, TasteProfile> known = TasteInference.authored(
+                Map.of("example:lemon", TasteProfile.of(Taste.BITTER, 1.0F)),
+                Map.of(
+                        "c:fruits", TasteProfile.of(Taste.SWEET, 0.6F),
+                        "c:nuts", TasteProfile.of(Taste.FAT, 0.55F),
+                        "c:bellpeppers", TasteProfile.of(Taste.SPICY, 0.4F)
+                ),
+                Map.of(
+                        "c:fruits", List.of("example:lemon", "example:almond", "example:bellpepper"),
+                        "c:nuts", List.of("example:almond"),
+                        "c:bellpeppers", List.of("example:bellpepper")
+                )
+        );
+        assertEquals(List.of(Taste.FAT), known.get("example:almond").shown());
+        assertEquals(List.of(Taste.SPICY), known.get("example:bellpepper").shown());
+        assertEquals(List.of(Taste.BITTER), known.get("example:lemon").shown());
+    }
+
+    @Test
     void aSaltTagSeasonsMembersUnlessTheItemSaysOtherwise() {
         Map<String, TasteProfile> known = TasteInference.authored(
                 Map.of("example:seasoned_salt", TasteProfile.of(Taste.SPICY, 1.0F)),
