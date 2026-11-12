@@ -163,6 +163,50 @@ class GroupInferenceTest {
     }
 
     @Test
+    void aNarrowTagReplacesTheCropCategoryAndAnItemReplacesBoth() {
+        Map<String, GroupShares> known = GroupTags.assign(
+                Map.of("example:lemon", GroupShares.of(FoodGroup.VEGETABLES, 1F)),
+                Map.of(
+                        "c:vegetables", GroupShares.of(FoodGroup.VEGETABLES, 1F),
+                        "c:fruits", GroupShares.of(FoodGroup.FRUIT, 1F),
+                        "c:nuts", GroupShares.of(FoodGroup.FRUIT, 1F),
+                        "c:bellpeppers", GroupShares.of(FoodGroup.VEGETABLES, 1F)
+                ),
+                Map.of(
+                        "c:vegetables", List.of("example:artichoke"),
+                        "c:fruits", List.of("example:lemon", "example:almond", "example:bellpepper"),
+                        "c:nuts", List.of("example:almond"),
+                        "c:bellpeppers", List.of("example:bellpepper")
+                ),
+                GroupTags.BROAD
+        );
+        assertEquals(100, known.get("example:artichoke").percent(FoodGroup.VEGETABLES));
+        assertEquals(100, known.get("example:almond").percent(FoodGroup.FRUIT));
+        assertEquals(100, known.get("example:bellpepper").percent(FoodGroup.VEGETABLES));
+        assertEquals(100, known.get("example:lemon").percent(FoodGroup.VEGETABLES));
+    }
+
+    @Test
+    void bakingATaggedCropKeepsTheVegetable() {
+        Map<String, GroupShares> authored = GroupTags.assign(
+                Map.of(),
+                Map.of("c:vegetables", GroupShares.of(FoodGroup.VEGETABLES, 1F)),
+                Map.of("c:vegetables", List.of("croptopia:sweetpotato")),
+                GroupTags.BROAD
+        );
+        String bake = """
+                {"type":"minecraft:smelting","ingredient":{"item":"croptopia:sweetpotato"},"result":{"id":"croptopia:baked_sweet_potato"}}
+                """;
+        Map<String, GroupShares> known = GroupInference.infer(
+                authored,
+                List.of(recipe("bake", bake)),
+                Map.of(),
+                Map.of("croptopia:sweetpotato", 1)
+        );
+        assertEquals(100, known.get("croptopia:baked_sweet_potato").percent(FoodGroup.VEGETABLES));
+    }
+
+    @Test
     void aTagFileListsItsItems() {
         List<String> eggs = GroupTags.items("""
                 {"values":["minecraft:egg",{"id":"#c:eggs","required":false},"minecraft:brown_egg"]}

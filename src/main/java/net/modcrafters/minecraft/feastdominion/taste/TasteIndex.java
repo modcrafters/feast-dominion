@@ -1,7 +1,11 @@
 package net.modcrafters.minecraft.feastdominion.taste;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.food.IngredientTable;
+import net.modcrafters.minecraft.feastdominion.food.TagTable;
 import net.modcrafters.minecraft.feastdominion.group.GroupInference;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.modcrafters.minecraft.feastdominion.group.GroupRecipes;
 import net.modcrafters.minecraft.feastdominion.group.GroupTags;
 import net.minecraft.server.packs.resources.Resource;
@@ -47,7 +51,7 @@ public final class TasteIndex {
 
     private static Map<String, TasteProfile> build(ResourceManager manager) {
         Map<String, TasteProfile> items = readProfiles(manager, "feast/taste/item");
-        Map<String, TasteProfile> tagTastes = readProfiles(manager, "feast/taste/tag");
+        Map<String, TasteProfile> tagTastes = TagTable.load(manager).tastes();
         Map<String, List<String>> rawTags = new HashMap<>();
         manager.listResourceStacks("tags/item", path -> path.getPath().endsWith(".json")).forEach((location, stack) -> {
             String tag = tagId(location.getNamespace(), location.getPath());
@@ -63,8 +67,19 @@ public final class TasteIndex {
                 // One unreadable recipe does not stop the rest.
             }
         });
-        Map<String, TasteProfile> authored = TasteInference.authored(items, tagTastes, GroupTags.flatten(rawTags));
-        return TasteInference.infer(authored, recipes, GroupTags.flatten(rawTags));
+        Map<String, List<String>> tags = GroupTags.flatten(rawTags);
+        Map<String, TasteProfile> authored = TasteInference.authored(Map.of(), tagTastes, tags);
+        IngredientTable.paint(authored, IngredientTable.load(manager).tastes(), itemIds());
+        authored.putAll(items);
+        return TasteInference.infer(authored, recipes, tags);
+    }
+
+    private static List<String> itemIds() {
+        List<String> ids = new ArrayList<>();
+        for (Item item : BuiltInRegistries.ITEM) {
+            ids.add(BuiltInRegistries.ITEM.getKey(item).toString());
+        }
+        return ids;
     }
 
     private static Map<String, TasteProfile> readProfiles(ResourceManager manager, String folder) {

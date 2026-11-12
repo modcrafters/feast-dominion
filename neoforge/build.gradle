@@ -66,6 +66,12 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    // Copied into the Croptopia runs, together with EpheroLib. Empty on versions that have no build.
+    croptopiaRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
 }
 configurations.named('runtimeClasspath') {
     extendsFrom(configurations.localRuntime)
@@ -89,13 +95,21 @@ tasks.register('syncDelight', Sync) {
     into(delightMods)
 }
 
+def croptopiaMods = layout.projectDirectory.dir('runs/client-croptopia/mods')
+tasks.register('syncCroptopia', Sync) {
+    from(configurations.croptopiaRuntime)
+    into(croptopiaMods)
+}
+
 def integrationMods = layout.projectDirectory.dir('runs/client-integrations/mods')
 tasks.register('syncIntegrations', Sync) {
-    from(configurations.appleSkinRuntime, configurations.solCarrotRuntime, configurations.delightRuntime)
+    from(configurations.appleSkinRuntime, configurations.solCarrotRuntime, configurations.delightRuntime, configurations.croptopiaRuntime)
     into(integrationMods)
 }
 
 def farmersDelight = findProperty('farmersdelight_version') ?: ''
+def croptopia = findProperty('croptopia_file') ?: ''
+def epherolib = findProperty('epherolib_file') ?: ''
 
 dependencies {
     localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
@@ -105,6 +119,10 @@ dependencies {
     solCarrotRuntime "curse.maven:spice-of-life-carrot-edition-277616:${solcarrot_file}"
     if (farmersDelight) {
         delightRuntime "maven.modrinth:farmers-delight:${farmersDelight}"
+    }
+    if (croptopia && epherolib) {
+        croptopiaRuntime "curse.maven:croptopia-415438:${croptopia}"
+        croptopiaRuntime "curse.maven:epherolib-885449:${epherolib}"
     }
 }
 
@@ -152,6 +170,14 @@ neoForge {
                 taskBefore tasks.named('syncDelight')
             }
         }
+        if (croptopia && epherolib) {
+            clientCroptopia {
+                client()
+                programArguments.addAll '--width', '1920', '--height', '1080'
+                gameDirectory = this.mkdir(this.file('runs/client-croptopia'))
+                taskBefore tasks.named('syncCroptopia')
+            }
+        }
         data {
             // clientData() since 1.21.4, data() before (neoforge_data_run in each version's gradle.properties).
             "${neoforge_data_run}"()
@@ -184,6 +210,9 @@ def delightRuns = ['clientAppleSkin', 'clientSolCarrot', 'clientIntegrations']
 if (farmersDelight) {
     delightRuns.add('clientDelight')
 }
+if (croptopia && epherolib) {
+    delightRuns.add('clientCroptopia')
+}
 delightRuns.each { runName ->
     neoForge.runs.named(runName) {
         if (java_version.toInteger() >= 25) {
@@ -198,6 +227,9 @@ if (java_version.toInteger() >= 25) {
     def delightTasks = ['runClientAppleSkin', 'runClientSolCarrot', 'runClientIntegrations']
     if (farmersDelight) {
         delightTasks.add('runClientDelight')
+    }
+    if (croptopia && epherolib) {
+        delightTasks.add('runClientCroptopia')
     }
     delightTasks.each { taskName ->
         tasks.named(taskName) {

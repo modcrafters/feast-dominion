@@ -13,7 +13,14 @@ public final class GroupFiles {
     }
 
     public static GroupShares read(Reader reader) {
-        JsonObject object = JsonParser.parseReader(reader).getAsJsonObject();
+        return read(JsonParser.parseReader(reader).getAsJsonObject());
+    }
+
+    public static GroupShares read(String json) {
+        return read(JsonParser.parseString(json).getAsJsonObject());
+    }
+
+    private static GroupShares read(JsonObject object) {
         float[] values = new float[FoodGroup.values().length];
         for (FoodGroup group : FoodGroup.values()) {
             String key = group.name().toLowerCase(Locale.ROOT);
