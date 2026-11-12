@@ -2,6 +2,7 @@ package net.modcrafters.minecraft.feastdominion.taste;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.food.IngredientTable;
+import net.modcrafters.minecraft.feastdominion.food.TagTable;
 import net.modcrafters.minecraft.feastdominion.group.GroupInference;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
@@ -50,7 +51,7 @@ public final class TasteIndex {
 
     private static Map<String, TasteProfile> build(ResourceManager manager) {
         Map<String, TasteProfile> items = readProfiles(manager, "feast/taste/item");
-        Map<String, TasteProfile> tagTastes = readProfiles(manager, "feast/taste/tag");
+        Map<String, TasteProfile> tagTastes = TagTable.load(manager).tastes();
         Map<String, List<String>> rawTags = new HashMap<>();
         manager.listResourceStacks("tags/item", path -> path.getPath().endsWith(".json")).forEach((location, stack) -> {
             String tag = tagId(location.getNamespace(), location.getPath());

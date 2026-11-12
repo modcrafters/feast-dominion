@@ -2,6 +2,7 @@ package net.modcrafters.minecraft.feastdominion.group;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.food.IngredientTable;
+import net.modcrafters.minecraft.feastdominion.food.TagTable;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.resources.Resource;
@@ -48,8 +49,8 @@ public final class GroupIndex {
     }
 
     private static Map<String, GroupShares> build(ResourceManager manager) {
-        Map<String, GroupShares> items = readGroups(manager, "feast/group", "feast/group/tag/");
-        Map<String, GroupShares> tagGroups = readGroups(manager, "feast/group/tag", null);
+        Map<String, GroupShares> items = readGroups(manager, "feast/group");
+        Map<String, GroupShares> tagGroups = TagTable.load(manager).groups();
         Map<String, List<String>> rawTags = new HashMap<>();
         manager.listResourceStacks("tags/item", path -> path.getPath().endsWith(".json")).forEach((location, stack) -> {
             String tag = tagId(location.getNamespace(), location.getPath());
@@ -72,13 +73,10 @@ public final class GroupIndex {
         return GroupInference.infer(authored, recipes, tags, hunger());
     }
 
-    private static Map<String, GroupShares> readGroups(ResourceManager manager, String folder, String skipPrefix) {
+    private static Map<String, GroupShares> readGroups(ResourceManager manager, String folder) {
         Map<String, GroupShares> groups = new HashMap<>();
-        manager.listResources(folder, path -> {
-            String full = path.getPath();
-            return full.endsWith(".json") && (skipPrefix == null || !full.startsWith(skipPrefix));
-        }).forEach((location, resource) -> {
-            String id = id(location.getPath(), folder.equals("feast/group") ? "feast/group/" : folder + "/");
+        manager.listResources(folder, path -> path.getPath().endsWith(".json")).forEach((location, resource) -> {
+            String id = id(location.getPath(), folder + "/");
             if (id.isEmpty()) {
                 return;
             }
