@@ -88,7 +88,11 @@ public final class Drinking {
         if (player.level().getBlockState(water).is(Blocks.WATER)
                 && player.distanceToSqr(Vec3.atCenterOf(water)) <= REACH_SQUARED) {
             boolean salty = WaterSources.salty(player.level().getBiome(water));
-            Services.THIRST.setPoints(player, Drink.after(Services.THIRST.points(player), salty));
+            if (salty) {
+                ThirstFood.apply(player, -Drink.AMOUNT, 0.0F);
+            } else {
+                ThirstFood.apply(player, Drink.AMOUNT, Drink.AMOUNT);
+            }
             play(player, 0.5F, 1.0F);
         }
         player.stopUsingItem();

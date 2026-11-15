@@ -21,4 +21,13 @@ public final class ThirstIcons {
         }
         return Fill.EMPTY;
     }
+
+    /** How many droplets this thirst paints. Ten is the most the bar holds. A cost paints none. */
+    public static int count(int points) {
+        int marks = 0;
+        while (marks < 10 && fill(points, marks) != Fill.EMPTY) {
+            marks++;
+        }
+        return marks;
+    }
 }

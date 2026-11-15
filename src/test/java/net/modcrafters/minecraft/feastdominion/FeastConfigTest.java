@@ -23,6 +23,23 @@ class FeastConfigTest {
     }
 
     @Test
+    void deathKeepsTheLeanUnlessTheConfigSaysSo() {
+        assertFalse(FeastConfig.resetLeanOnDeath("# nothing here\n"));
+        assertFalse(FeastConfig.resetLeanOnDeath("reset_lean_on_death=false"));
+        assertTrue(FeastConfig.resetLeanOnDeath("reset_lean_on_death=TRUE"));
+    }
+
+    @Test
+    void aMissKeepsThreeQuartersUnlessToldOtherwise() {
+        assertEquals(75, FeastConfig.leanMissPercent("# nothing here\n"));
+        assertEquals(75, FeastConfig.leanMissPercent("lean_miss_percent=75"));
+        assertEquals(100, FeastConfig.leanMissPercent("lean_miss_percent=100"));
+        assertEquals(0, FeastConfig.leanMissPercent("lean_miss_percent=0"));
+        assertEquals(75, FeastConfig.leanMissPercent("lean_miss_percent=75.5"));
+        assertEquals(75, FeastConfig.leanMissPercent("lean_miss_percent=101"));
+    }
+
+    @Test
     void debugCommandsStayOffUnlessAsked() {
         assertFalse(FeastConfig.debugCommands("# nothing here\n"));
         assertFalse(FeastConfig.debugCommands("add_debug_commands=false"));

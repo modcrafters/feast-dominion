@@ -1,6 +1,7 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.client.SaturationIcons.Mark;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
 import net.modcrafters.minecraft.feastdominion.thirst.ThirstIcons;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,10 @@ public final class ThirstHud {
     private static final Identifier EMPTY = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_empty");
     private static final Identifier HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_half");
     private static final Identifier FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_full");
+    private static final Identifier QUENCH_FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_full");
+    private static final Identifier QUENCH_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_half");
+    private static final Identifier QUENCH_FULL_OVER = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_full_2");
+    private static final Identifier QUENCH_HALF_OVER = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_half_2");
     public static final int ROW = 10;
 
     private ThirstHud() {
@@ -53,6 +58,19 @@ public final class ThirstHud {
             };
             if (fill != null) {
                 graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, x, y, 9, 9);
+            }
+        }
+        float quench = Services.THIRST.level(player).quench();
+        for (int fromRight = 0; fromRight < 10; fromRight++) {
+            Mark mark = SaturationIcons.mark(quench, fromRight);
+            if (mark == Mark.NONE) {
+                break;
+            }
+            int x = xRight - fromRight * 8 - 9;
+            SaturationHud.blit(graphics, mark == Mark.FULL ? QUENCH_FULL : QUENCH_HALF, x, y);
+            Mark over = SaturationIcons.extra(quench, fromRight);
+            if (over != Mark.NONE) {
+                SaturationHud.blit(graphics, over == Mark.FULL ? QUENCH_FULL_OVER : QUENCH_HALF_OVER, x - 1, y - 1, 11);
             }
         }
     }

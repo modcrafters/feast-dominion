@@ -4,6 +4,7 @@ import net.modcrafters.minecraft.feastdominion.feature.HealthIncreaseFeature;
 import net.modcrafters.minecraft.feastdominion.feature.Variety;
 import net.modcrafters.minecraft.feastdominion.feature.VarietyView;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
+import net.modcrafters.minecraft.feastdominion.taste.Taste;
 import net.modcrafters.minecraft.feastdominion.thirst.Thirst;
 import net.modcrafters.minecraft.feastdominion.wellness.DietBand;
 import net.modcrafters.minecraft.feastdominion.wellness.DietMemory;
@@ -13,10 +14,12 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+
+import java.util.Locale;
 //? if >=26.1
 import net.minecraft.client.renderer.RenderPipelines;
 
-/** The wellbeing book: thirst and the seven bands, and variety when Spice of Life is absent. */
+/** The wellbeing book: the lean, thirst, and the seven bands, and variety when Spice of Life is absent. */
 public final class WellbeingBookScreen extends Screen {
     private static final Identifier BOOK = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/book.png");
     private static final int BOOK_WIDTH = 192;
@@ -109,6 +112,21 @@ public final class WellbeingBookScreen extends Screen {
         y += 16;
         DietMemory diet = DietMemory.start();
         if (this.minecraft != null && this.minecraft.player != null) {
+            Taste lean = Services.LEAN.taste(this.minecraft.player);
+            if (lean != null) {
+                graphics.text(
+                        this.font,
+                        Component.translatable(
+                                "feast_dominion.wellbeing.lean",
+                                Component.translatable("feast_dominion.taste." + lean.name().toLowerCase(Locale.ROOT))
+                        ),
+                        textX,
+                        y,
+                        0,
+                        false
+                );
+                y += 12;
+            }
             int thirst = Services.THIRST.points(this.minecraft.player);
             diet = Services.GROUPS.memory(this.minecraft.player);
             graphics.text(

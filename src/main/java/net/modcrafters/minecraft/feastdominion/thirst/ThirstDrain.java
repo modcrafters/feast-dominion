@@ -18,7 +18,7 @@ public final class ThirstDrain {
         NORMAL
     }
 
-    public record Step(int points, int drain) {
+    public record Step(int points, float quench, int drain) {
     }
 
     /** A biome on both lists is dry. */
@@ -32,20 +32,26 @@ public final class ThirstDrain {
         return Climate.NORMAL;
     }
 
-    public static Step tick(int points, int drain, Climate climate) {
-        if (points <= 0) {
-            return new Step(0, 0);
+    /** Quench spends first. A thirst point falls only when the reserve is empty. */
+    public static Step tick(int points, float quench, int drain, Climate climate) {
+        if (points <= 0 && quench <= 0.0F) {
+            return new Step(0, 0.0F, 0);
         }
         int next = drain + rate(climate);
         int left = points;
-        while (next >= THRESHOLD && left > 0) {
+        float reserve = quench;
+        while (next >= THRESHOLD && (reserve > 0.0F || left > 0)) {
             next -= THRESHOLD;
-            left--;
+            if (reserve > 0.0F) {
+                reserve = Math.max(0.0F, reserve - 1.0F);
+            } else {
+                left--;
+            }
         }
-        if (left == 0) {
+        if (left == 0 && reserve <= 0.0F) {
             next = 0;
         }
-        return new Step(left, next);
+        return new Step(left, Quench.clamp(left, reserve), next);
     }
 
     private static int rate(Climate climate) {
