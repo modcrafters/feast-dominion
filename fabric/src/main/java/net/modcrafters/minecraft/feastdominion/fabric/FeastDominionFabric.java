@@ -2,8 +2,10 @@ package net.modcrafters.minecraft.feastdominion.fabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.modcrafters.minecraft.feastdominion.FeastDominion;
@@ -13,7 +15,9 @@ import net.modcrafters.minecraft.feastdominion.network.SaturationPayload;
 import net.modcrafters.minecraft.feastdominion.network.SaturationSync;
 import net.modcrafters.minecraft.feastdominion.network.VarietyPayload;
 import net.modcrafters.minecraft.feastdominion.thirst.Drinking;
+import net.modcrafters.minecraft.feastdominion.thirst.WaterDrink;
 import net.modcrafters.minecraft.feastdominion.thirst.ThirstClock;
+import net.modcrafters.minecraft.feastdominion.taste.LeanClock;
 import net.modcrafters.minecraft.feastdominion.wellness.DietClock;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -27,11 +31,15 @@ public class FeastDominionFabric implements ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(SaturationPayload.TYPE, SaturationPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(VarietyPayload.TYPE, VarietyPayload.STREAM_CODEC);
         UseBlockCallback.EVENT.register(FeastDominionFabric::onUseBlock);
+        UseItemCallback.EVENT.register((player, level, hand) -> WaterDrink.start(player, hand));
         ServerTickEvents.END_SERVER_TICK.register(server -> server.getPlayerList().getPlayers().forEach(player -> {
+            LeanClock.ensure(player);
             ThirstClock.tick(player);
             DietClock.tick(player);
             SaturationSync.tick(player);
         }));
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) ->
+                LeanClock.respawn(oldPlayer, newPlayer, !alive));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             ThirstClock.save(handler.getPlayer());
             DietClock.save(handler.getPlayer());
@@ -43,6 +51,10 @@ public class FeastDominionFabric implements ModInitializer {
     }
 
     private static InteractionResult onUseBlock(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
+        InteractionResult drink = WaterDrink.start(player, hand);
+        if (drink.consumesAction()) {
+            return drink;
+        }
         return Drinking.interact(player, level, hand, hit.getBlockPos(), hit.getDirection());
     }
 }

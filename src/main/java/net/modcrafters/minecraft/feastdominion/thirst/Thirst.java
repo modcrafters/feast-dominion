@@ -6,4 +6,16 @@ public final class Thirst {
 
     private Thirst() {
     }
+
+    /** Adds a food's thirst number and keeps the result on the bar. */
+    public static int changed(int points, int delta) {
+        int next = points + delta;
+        if (next < 0) {
+            return 0;
+        }
+        if (next > POINTS) {
+            return POINTS;
+        }
+        return next;
+    }
 }

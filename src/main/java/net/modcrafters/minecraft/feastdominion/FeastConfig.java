@@ -16,6 +16,8 @@ public final class FeastConfig {
     static final String WEIGHT_WEEK = "health_weight_week";
     static final String WEIGHT_MONTH = "health_weight_month";
     static final String DEBUG = "add_debug_commands";
+    static final String RESET_LEAN = "reset_lean_on_death";
+    static final String LEAN_MISS = "lean_miss_percent";
     /** A run can force the debug command on without editing the properties file. */
     public static final String DEBUG_PROPERTY = "feast_dominion.add_debug_commands";
     private static final String TEMPLATE = """
@@ -39,9 +41,23 @@ public final class FeastConfig {
             # true registers the command for operators. A run can set feast_dominion.add_debug_commands=true.
             add_debug_commands=false
             """;
+    private static final String LEAN_TEMPLATE = """
+            # Death.
+            # true: dying rolls a different lean.
+            # false: the lean stays.
+            reset_lean_on_death=false
+            """;
+    private static final String MISS_TEMPLATE = """
+            # A meal with none of your lean.
+            # The percent of its hunger and saturation you still receive. 100 keeps the whole meal.
+            # Hunger rounds to the nearest point.
+            lean_miss_percent=75
+            """;
 
     private static volatile boolean drainInPeaceful = true;
     private static volatile boolean debugCommands = false;
+    private static volatile boolean resetLeanOnDeath = false;
+    private static volatile int leanMissPercent = 75;
     private static volatile HealthSettings health = HealthSettings.DEFAULT;
 
     private FeastConfig() {
@@ -53,6 +69,14 @@ public final class FeastConfig {
 
     public static HealthSettings health() {
         return health;
+    }
+
+    public static boolean resetLeanOnDeath() {
+        return resetLeanOnDeath;
+    }
+
+    public static int leanMissPercent() {
+        return leanMissPercent;
     }
 
     /** The properties file, unless the run set {@link #DEBUG_PROPERTY}. */
@@ -84,11 +108,23 @@ public final class FeastConfig {
                 text = append(text, DEBUG_TEMPLATE);
                 Files.writeString(file, text);
             }
+            if (!text.contains(RESET_LEAN)) {
+                text = append(text, LEAN_TEMPLATE);
+                Files.writeString(file, text);
+            }
+            if (!text.contains(LEAN_MISS)) {
+                text = append(text, MISS_TEMPLATE);
+                Files.writeString(file, text);
+            }
             drainInPeaceful = parse(text);
             debugCommands = debugCommands(text);
+            resetLeanOnDeath = resetLeanOnDeath(text);
+            leanMissPercent = leanMissPercent(text);
             health = healthSettings(text);
         } catch (IOException e) {
             drainInPeaceful = true;
+            resetLeanOnDeath = false;
+            leanMissPercent = 75;
             Constants.LOG.error("Could not read {}. Peaceful difficulty keeps spending thirst and hunger.", FILE_NAME, e);
         }
     }
@@ -116,6 +152,14 @@ public final class FeastConfig {
             }
         }
         return value;
+    }
+
+    static boolean resetLeanOnDeath(String text) {
+        return flag(text, RESET_LEAN, false);
+    }
+
+    static int leanMissPercent(String text) {
+        return whole(text, LEAN_MISS, 75, 0, 100);
     }
 
     static boolean debugCommands(String text) {
@@ -175,6 +219,57 @@ public final class FeastConfig {
                 week == null ? defaults.weekWeight() : week,
                 month == null ? defaults.monthWeight() : month
         );
+    }
+
+    private static boolean flag(String text, String key, boolean fallback) {
+        boolean value = fallback;
+        for (String raw : text.split("\n", -1)) {
+            String line = raw.strip();
+            if (line.isEmpty() || line.startsWith("#")) {
+                continue;
+            }
+            int split = line.indexOf('=');
+            if (split < 0) {
+                continue;
+            }
+            if (!key.equals(line.substring(0, split).strip())) {
+                continue;
+            }
+            String setting = line.substring(split + 1).strip();
+            if (setting.equalsIgnoreCase("true")) {
+                value = true;
+            } else if (setting.equalsIgnoreCase("false")) {
+                value = false;
+            }
+        }
+        return value;
+    }
+
+    private static int whole(String text, String key, int fallback, int min, int max) {
+        int value = fallback;
+        for (String raw : text.split("\n", -1)) {
+            String line = raw.strip();
+            if (line.isEmpty() || line.startsWith("#") || line.indexOf('=') < 0) {
+                continue;
+            }
+            int split = line.indexOf('=');
+            if (!key.equals(line.substring(0, split).strip())) {
+                continue;
+            }
+            String setting = line.substring(split + 1).strip();
+            if (setting.isEmpty() || setting.charAt(0) == '-' || setting.indexOf('.') >= 0) {
+                continue;
+            }
+            try {
+                int parsed = Integer.parseInt(setting);
+                if (parsed >= min && parsed <= max) {
+                    value = parsed;
+                }
+            } catch (NumberFormatException ignored) {
+                // A bad line keeps the fallback.
+            }
+        }
+        return value;
     }
 
     private static String append(String text, String block) {

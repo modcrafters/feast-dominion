@@ -33,10 +33,10 @@ public final class ThirstClock {
         ThirstLevel saved = Services.THIRST.level(player);
         int drain = DRAIN.computeIfAbsent(player.getUUID(), id -> saved.drain());
         ThirstDrain.Climate climate = ThirstClimates.of(player.level().getBiome(player.blockPosition()));
-        ThirstDrain.Step step = ThirstDrain.tick(saved.points(), drain, climate);
+        ThirstDrain.Step step = ThirstDrain.tick(saved.points(), saved.quench(), drain, climate);
         DRAIN.put(player.getUUID(), step.drain());
-        if (step.points() != saved.points()) {
-            Services.THIRST.setLevel(player, new ThirstLevel(step.points(), step.drain()));
+        if (step.points() != saved.points() || Float.compare(step.quench(), saved.quench()) != 0) {
+            Services.THIRST.setLevel(player, new ThirstLevel(step.points(), step.drain(), step.quench()));
         }
         if (step.points() == 0) {
             weaken(player);
@@ -50,7 +50,7 @@ public final class ThirstClock {
         }
         ThirstLevel saved = Services.THIRST.level(player);
         if (saved.drain() != drain) {
-            Services.THIRST.setLevel(player, new ThirstLevel(saved.points(), drain));
+            Services.THIRST.setLevel(player, new ThirstLevel(saved.points(), drain, saved.quench()));
         }
     }
 

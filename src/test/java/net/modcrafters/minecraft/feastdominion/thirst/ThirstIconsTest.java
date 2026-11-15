@@ -30,4 +30,12 @@ class ThirstIconsTest {
         assertEquals(ThirstIcons.Fill.FULL, ThirstIcons.fill(19, 8));
         assertEquals(ThirstIcons.Fill.HALF, ThirstIcons.fill(19, 9));
     }
+
+    @Test
+    void oneDrinkIsThreeDroplets() {
+        assertEquals(3, ThirstIcons.count(6));
+        assertEquals(1, ThirstIcons.count(1));
+        assertEquals(0, ThirstIcons.count(0));
+        assertEquals(0, ThirstIcons.count(-6));
+    }
 }

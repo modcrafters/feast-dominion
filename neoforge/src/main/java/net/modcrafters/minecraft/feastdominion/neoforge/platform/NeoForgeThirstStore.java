@@ -44,6 +44,7 @@ public class NeoForgeThirstStore implements ThirstStore {
 
     @Override
     public void setPoints(Player player, int points) {
-        setLevel(player, new ThirstLevel(points, level(player).drain()));
+        ThirstLevel level = level(player);
+        setLevel(player, new ThirstLevel(points, level.drain(), level.quench()));
     }
 }

@@ -38,7 +38,7 @@ public class GroupTooltipMixin {
         }
         *///?}
         List<Component> lines = new ArrayList<>(call.getReturnValue());
-        TasteTooltip.add(stack, lines);
+        TasteTooltip.add(stack, player, lines);
         GroupTooltip.add(stack, lines);
         call.setReturnValue(lines);
     }

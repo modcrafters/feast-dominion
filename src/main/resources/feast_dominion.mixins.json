@@ -10,6 +10,7 @@
     "PeacefulFillMixin",
     "HealthIncreaseMixin",
     "FoodMemoryMixin",
+    "WaterBucketUseMixin",
     "SaturationCapMixin",
     "EatRoomMixin"
   ],
