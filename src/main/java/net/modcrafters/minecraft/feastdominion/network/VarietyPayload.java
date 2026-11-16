@@ -7,6 +7,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** The three windows, the hearts they are worth, and the weights, for the local player. */
 public record VarietyPayload(VarietyView.Snapshot snapshot) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<VarietyPayload> TYPE = new CustomPacketPayload.Type<>(
@@ -22,6 +25,9 @@ public record VarietyPayload(VarietyView.Snapshot snapshot) implements CustomPac
                 buf.writeVarInt(snapshot.dayWeight());
                 buf.writeVarInt(snapshot.weekWeight());
                 buf.writeVarInt(snapshot.monthWeight());
+                writeItems(buf, snapshot.todayItems());
+                writeItems(buf, snapshot.weekItems());
+                writeItems(buf, snapshot.monthItems());
             },
             buf -> new VarietyPayload(new VarietyView.Snapshot(
                     buf.readVarInt(),
@@ -30,9 +36,28 @@ public record VarietyPayload(VarietyView.Snapshot snapshot) implements CustomPac
                     buf.readDouble(),
                     buf.readVarInt(),
                     buf.readVarInt(),
-                    buf.readVarInt()
+                    buf.readVarInt(),
+                    readItems(buf),
+                    readItems(buf),
+                    readItems(buf)
             ))
     );
+
+    private static void writeItems(RegistryFriendlyByteBuf buf, List<String> items) {
+        buf.writeVarInt(items.size());
+        for (String item : items) {
+            buf.writeUtf(item);
+        }
+    }
+
+    private static List<String> readItems(RegistryFriendlyByteBuf buf) {
+        int count = buf.readVarInt();
+        List<String> items = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            items.add(buf.readUtf());
+        }
+        return List.copyOf(items);
+    }
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

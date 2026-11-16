@@ -76,7 +76,8 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
         }
         FoodProperties food = stack.get(DataComponents.FOOD);
         int nutrition = food == null ? 0 : food.nutrition();
-        FoodLog log = Services.DIET.log(player).remember(day(player), shares, DietLevels.serving(nutrition));
+        FoodLog log = Services.DIET.log(player).remember(day(player), shares, DietLevels.serving(nutrition))
+                .eat(day(player), id);
         Services.DIET.setLog(player, log);
         apply(player);
     }
@@ -109,7 +110,8 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
     public VarietyView.Snapshot snapshot(ServerPlayer player) {
         HealthSettings settings = FeastConfig.health();
         Variety.Counts counts = Variety.counts(Services.DIET.log(player), day(player));
-        return VarietyView.Snapshot.of(counts, settings);
+        return VarietyView.Snapshot.of(
+                counts, settings, MealSlots.of(Services.DIET.log(player).eaten(), day(player)));
     }
 
     static long day(ServerPlayer player) {
