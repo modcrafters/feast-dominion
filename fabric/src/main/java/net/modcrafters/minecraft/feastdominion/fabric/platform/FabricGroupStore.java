@@ -14,6 +14,7 @@ public class FabricGroupStore implements GroupStore {
             Identifier.fromNamespaceAndPath(Constants.MOD_ID, "groups"),
             builder -> builder.initializer(DietMemory::start)
                     .persistent(DietMemory.CODEC)
+                    .copyOnDeath()
                     .syncWith(DietMemory.STREAM_CODEC, AttachmentSyncPredicate.all())
     );
 

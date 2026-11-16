@@ -43,8 +43,8 @@ public final class FeastConfig {
             """;
     private static final String LEAN_TEMPLATE = """
             # Death.
-            # true: dying rolls a different lean.
-            # false: the lean stays.
+            # true: dying rolls a different lean, and clears the food groups and the hearts.
+            # false: the lean, the food groups, and the hearts stay.
             reset_lean_on_death=false
             """;
     private static final String MISS_TEMPLATE = """
@@ -110,6 +110,18 @@ public final class FeastConfig {
             }
             if (!text.contains(RESET_LEAN)) {
                 text = append(text, LEAN_TEMPLATE);
+                Files.writeString(file, text);
+            } else if (text.contains("# true: dying rolls a different lean.\n")) {
+                text = text.replace(
+                        """
+                        # true: dying rolls a different lean.
+                        # false: the lean stays.
+                        """,
+                        """
+                        # true: dying rolls a different lean, and clears the food groups and the hearts.
+                        # false: the lean, the food groups, and the hearts stay.
+                        """
+                );
                 Files.writeString(file, text);
             }
             if (!text.contains(LEAN_MISS)) {

@@ -2,23 +2,39 @@ package net.modcrafters.minecraft.feastdominion.wellness;
 
 import net.modcrafters.minecraft.feastdominion.group.GroupShares;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
-/** The seven group counts. A new life starts at half, eating adds, and time takes one point back. */
+/** The seven group counts. A new life is half full, and a meal replaces that much of the recent diet. */
 public final class DietLevels {
-    /** One point fades after 30 seconds, the same pace as one thirst droplet. */
-    public static final int TICKS_PER_POINT = 600;
+    /** Hunger in the recent diet. Older meals leave once newer ones fill this. */
+    public static final int WINDOW = 80;
+    /** A food with no hunger, such as a bucket of milk, counts as one meal. */
+    public static final int SERVING = 4;
 
     private DietLevels() {
     }
 
-    public record Step(int[] points, int drain) {
+    /** One meal. {@code shares} is how much of it sits in each group. Newest meals are kept first. */
+    public record Meal(int hunger, float[] shares) {
+        public Meal {
+            float[] copy = new float[FoodGroup.values().length];
+            for (int i = 0; i < copy.length; i++) {
+                float value = shares != null && i < shares.length ? shares[i] : 0.0F;
+                copy[i] = value < 0.0F ? 0.0F : value;
+            }
+            shares = copy;
+            if (hunger < 0) {
+                hunger = 0;
+            }
+        }
     }
 
-    public static int[] starting() {
-        int[] points = new int[FoodGroup.values().length];
-        Arrays.fill(points, Wellness.POINTS / 2);
-        return points;
+    public static int serving(int nutrition) {
+        if (nutrition > 0) {
+            return nutrition;
+        }
+        return SERVING;
     }
 
     public static int clamp(int points) {
@@ -28,40 +44,59 @@ public final class DietLevels {
         return Math.min(points, Wellness.POINTS);
     }
 
-    /** Adds each group's share of the meal's weight, and stops at a full bar. */
-    public static int[] eat(int[] points, GroupShares shares, int weight) {
-        int[] next = points.clone();
-        if (weight <= 0 || shares == null) {
-            return next;
-        }
-        for (FoodGroup group : FoodGroup.values()) {
-            int gain = Math.round(shares.get(group) * weight);
-            next[group.ordinal()] = clamp(next[group.ordinal()] + gain);
-        }
-        return next;
+    /** Half on every group. No meals have replaced the default yet. */
+    public static int[] starting() {
+        return points(List.of());
     }
 
-    /** Counts ticks until every group that still has a point loses one. An empty diet holds still. */
-    public static Step tick(int[] points, int drain) {
-        boolean any = false;
-        for (int point : points) {
-            if (point > 0) {
-                any = true;
+    /** Puts the meal at the front and drops meals that have fallen out of the window. */
+    public static List<Meal> remember(List<Meal> meals, GroupShares shares, int hunger) {
+        if (hunger <= 0 || shares == null || !shares.any()) {
+            return meals == null ? List.of() : meals;
+        }
+        float[] copy = new float[FoodGroup.values().length];
+        for (FoodGroup group : FoodGroup.values()) {
+            copy[group.ordinal()] = shares.get(group);
+        }
+        List<Meal> next = new ArrayList<>();
+        next.add(new Meal(hunger, copy));
+        if (meals != null) {
+            next.addAll(meals);
+        }
+        int filled = 0;
+        List<Meal> kept = new ArrayList<>();
+        for (Meal meal : next) {
+            if (filled >= WINDOW) {
                 break;
             }
+            kept.add(meal);
+            filled += meal.hunger();
         }
-        if (!any) {
-            return new Step(points.clone(), 0);
-        }
-        if (drain + 1 < TICKS_PER_POINT) {
-            return new Step(points.clone(), drain + 1);
-        }
-        int[] next = points.clone();
-        for (int i = 0; i < next.length; i++) {
-            if (next[i] > 0) {
-                next[i]--;
+        return List.copyOf(kept);
+    }
+
+    /** Each group is its share of the last {@link #WINDOW} hunger. The rest of the window stays at half. */
+    public static int[] points(List<Meal> meals) {
+        float[] sum = new float[FoodGroup.values().length];
+        int filled = 0;
+        if (meals != null) {
+            for (Meal meal : meals) {
+                if (filled >= WINDOW) {
+                    break;
+                }
+                int take = Math.min(meal.hunger(), WINDOW - filled);
+                for (int i = 0; i < sum.length; i++) {
+                    sum[i] += meal.shares()[i] * take;
+                }
+                filled += take;
             }
         }
-        return new Step(next, 0);
+        int gap = WINDOW - filled;
+        int[] points = new int[sum.length];
+        for (int i = 0; i < points.length; i++) {
+            double value = (sum[i] + 0.5 * gap) / WINDOW;
+            points[i] = clamp((int) Math.round(value * Wellness.POINTS));
+        }
+        return points;
     }
 }

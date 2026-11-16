@@ -1,48 +1,42 @@
 package net.modcrafters.minecraft.feastdominion.feature;
 
-/** Recent foods and drinks, and the hearts they are worth. */
+import net.modcrafters.minecraft.feastdominion.wellness.FoodGroup;
+import net.modcrafters.minecraft.feastdominion.wellness.Wellness;
+
+import java.util.Arrays;
+
+/** Recent meals, and the hearts they are worth. A group counts its hunger, and extra hunger past the quota adds nothing. */
 public final class Variety {
-    public static final int DAY_CAP = 3;
-    public static final int WEEK_CAP = 10;
-    public static final int MONTH_CAP = 20;
     /** Today and the six days before it. */
     public static final int WEEK_DAYS = 7;
     /** Today and the twenty-seven days before it. */
     public static final int MONTH_DAYS = 28;
+    public static final int DAY_GROUPS = 3;
+    public static final int DAY_HUNGER = 4;
+    public static final int WEEK_GROUPS = 5;
+    public static final int WEEK_HUNGER = 12;
+    public static final int MONTH_GROUPS = 7;
+    public static final int MONTH_HUNGER = 28;
 
     private Variety() {
     }
 
-    public record Counts(int today, int week, int month) {
+    /** Each value is the filled fraction of that window, from 0 to 1. */
+    public record Counts(double today, double week, double month) {
     }
 
     public static Counts counts(FoodLog log, long today) {
-        int day = 0;
-        int week = 0;
-        int month = 0;
-        for (long eaten : log.lastEaten().values()) {
-            long age = today - eaten;
-            if (age < 0) {
-                continue;
-            }
-            if (age == 0) {
-                day++;
-            }
-            if (age < WEEK_DAYS) {
-                week++;
-            }
-            if (age < MONTH_DAYS) {
-                month++;
-            }
-        }
-        return new Counts(day, week, month);
+        return new Counts(
+                fill(sum(log, today, 1), DAY_GROUPS, DAY_HUNGER),
+                fill(sum(log, today, WEEK_DAYS), WEEK_GROUPS, WEEK_HUNGER),
+                fill(sum(log, today, MONTH_DAYS), MONTH_GROUPS, MONTH_HUNGER)
+        );
     }
 
-    public static double fraction(int count, int cap) {
-        if (cap <= 0) {
-            return 0;
-        }
-        return Math.min(1.0, count / (double) cap);
+    /** Hunger-bar marks for a window. Twenty is a full bar. */
+    public static int marks(double fraction) {
+        double clamped = Math.min(1.0, Math.max(0.0, fraction));
+        return (int) Math.round(clamped * Wellness.POINTS);
     }
 
     /** Weights are whole numbers. A full set of windows is their sum, whatever that sum is. */
@@ -51,9 +45,7 @@ public final class Variety {
         if (sum <= 0) {
             return 0;
         }
-        double filled = dayWeight * fraction(counts.today(), DAY_CAP)
-                + weekWeight * fraction(counts.week(), WEEK_CAP)
-                + monthWeight * fraction(counts.month(), MONTH_CAP);
+        double filled = dayWeight * counts.today() + weekWeight * counts.week() + monthWeight * counts.month();
         return filled / sum;
     }
 
@@ -71,5 +63,36 @@ public final class Variety {
             return text.substring(0, text.length() - 2);
         }
         return text;
+    }
+
+    private static float[] sum(FoodLog log, long today, int days) {
+        float[] total = new float[FoodGroup.values().length];
+        for (FoodLog.Day entry : log.days()) {
+            long age = today - entry.day();
+            if (age < 0 || age >= days) {
+                continue;
+            }
+            for (int i = 0; i < total.length && i < entry.hunger().length; i++) {
+                total[i] += entry.hunger()[i];
+            }
+        }
+        return total;
+    }
+
+    /** The fullest groups, each capped, over the hunger those groups can hold. */
+    private static double fill(float[] hunger, int groups, int cap) {
+        if (groups <= 0 || cap <= 0) {
+            return 0;
+        }
+        float[] capped = hunger.clone();
+        for (int i = 0; i < capped.length; i++) {
+            capped[i] = Math.min(Math.max(capped[i], 0.0F), cap);
+        }
+        Arrays.sort(capped);
+        double sum = 0;
+        for (int i = capped.length - 1; i >= 0 && i >= capped.length - groups; i--) {
+            sum += capped[i];
+        }
+        return sum / (groups * (double) cap);
     }
 }
