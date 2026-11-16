@@ -31,9 +31,9 @@ public final class VarietyView {
 
         public static Snapshot of(Variety.Counts counts, HealthSettings settings) {
             return new Snapshot(
-                    counts.today(),
-                    counts.week(),
-                    counts.month(),
+                    Variety.marks(counts.today()),
+                    Variety.marks(counts.week()),
+                    Variety.marks(counts.month()),
                     settings.hearts(counts),
                     settings.dayWeight(),
                     settings.weekWeight(),

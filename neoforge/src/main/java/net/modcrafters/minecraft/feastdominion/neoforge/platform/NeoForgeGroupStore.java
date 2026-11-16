@@ -23,6 +23,7 @@ public class NeoForgeGroupStore implements GroupStore {
                     //?} else
                     //.serialize(DietMemory.CODEC)
                     .sync(DietMemory.STREAM_CODEC)
+                    .copyOnDeath()
                     .build()
     );
 

@@ -2,7 +2,10 @@ package net.modcrafters.minecraft.feastdominion.feature;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.FeastConfig;
+import net.modcrafters.minecraft.feastdominion.group.GroupIndex;
+import net.modcrafters.minecraft.feastdominion.group.GroupShares;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
+import net.modcrafters.minecraft.feastdominion.wellness.DietLevels;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -14,6 +17,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -61,11 +65,18 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
     }
 
     public void consume(ServerPlayer player, ItemStack stack) {
-        if (!enabled() || !counts(stack)) {
+        if (!enabled() || stack.isEmpty() || player.level().getServer() == null) {
             return;
         }
-        String item = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-        FoodLog log = Services.DIET.log(player).remember(item, day(player));
+        GroupIndex.ensure(player.level().getServer().getResourceManager());
+        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        GroupShares shares = GroupIndex.shares(id);
+        if (!shares.any()) {
+            return;
+        }
+        FoodProperties food = stack.get(DataComponents.FOOD);
+        int nutrition = food == null ? 0 : food.nutrition();
+        FoodLog log = Services.DIET.log(player).remember(day(player), shares, DietLevels.serving(nutrition));
         Services.DIET.setLog(player, log);
         apply(player);
     }

@@ -2,7 +2,10 @@ package net.modcrafters.minecraft.feastdominion.taste;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.FeastConfig;
+import net.modcrafters.minecraft.feastdominion.feature.FoodLog;
+import net.modcrafters.minecraft.feastdominion.feature.HealthIncreaseFeature;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
+import net.modcrafters.minecraft.feastdominion.wellness.DietMemory;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -31,8 +34,16 @@ public final class LeanClock {
         Services.LEAN.set(player, Lean.pick(player.getRandom().nextInt(Taste.values().length)));
     }
 
-    /** The new body keeps the old lean, or rolls a different one when death is allowed to. */
+    /**
+     * The new body keeps the lean, the food groups, and the hearts.
+     * When {@code reset_lean_on_death} is set, a death clears the groups and the hearts and rolls a different lean.
+     */
     public static void respawn(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean died) {
+        if (died && FeastConfig.resetLeanOnDeath()) {
+            Services.GROUPS.setMemory(newPlayer, DietMemory.start());
+            Services.DIET.setLog(newPlayer, FoodLog.EMPTY);
+            HealthIncreaseFeature.instance().apply(newPlayer);
+        }
         Taste current = Services.LEAN.taste(oldPlayer);
         if (current == null) {
             ensure(newPlayer);

@@ -19,7 +19,7 @@ import java.util.Locale;
 //? if >=26.1
 import net.minecraft.client.renderer.RenderPipelines;
 
-/** The wellbeing book: the lean, thirst, and the seven bands, and variety when Spice of Life is absent. */
+/** The wellbeing book: an overview, the seven groups, and the health windows when Spice of Life is absent. */
 public final class WellbeingBookScreen extends Screen {
     private static final Identifier BOOK = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/book.png");
     private static final int BOOK_WIDTH = 192;
@@ -61,17 +61,20 @@ public final class WellbeingBookScreen extends Screen {
     }
     *///?}
 
+    private int lastPage() {
+        return HealthIncreaseFeature.instance().enabled() ? 2 : 1;
+    }
+
     private boolean turnPage(double mouseX, double mouseY) {
-        if (!HealthIncreaseFeature.instance().enabled()) {
-            return false;
-        }
         int textX = (this.width - BOOK_WIDTH) / 2 + 36;
-        if (this.page == 0 && mouseX >= textX + 90 && mouseX <= textX + 130 && mouseY >= 148 && mouseY <= 164) {
-            this.page = 1;
+        boolean next = mouseX >= textX + 90 && mouseX <= textX + 130 && mouseY >= 148 && mouseY <= 164;
+        boolean back = mouseX >= textX && mouseX <= textX + 40 && mouseY >= 148 && mouseY <= 164;
+        if (next && this.page < this.lastPage()) {
+            this.page++;
             return true;
         }
-        if (this.page == 1 && mouseX >= textX && mouseX <= textX + 40 && mouseY >= 148 && mouseY <= 164) {
-            this.page = 0;
+        if (back && this.page > 0) {
+            this.page--;
             return true;
         }
         return false;
@@ -102,11 +105,33 @@ public final class WellbeingBookScreen extends Screen {
         //?} else
         //graphics.blit(BOOK, left, 2, 0, 0, BOOK_WIDTH, BOOK_HEIGHT);
         int textX = left + 36;
-        if (this.page == 1 && HealthIncreaseFeature.instance().enabled()) {
-            drawVariety(graphics, textX);
-            return;
+        if (this.page > this.lastPage()) {
+            this.page = 0;
         }
-        this.page = 0;
+        if (this.page == 2) {
+            drawHealth(graphics, textX);
+        } else if (this.page == 1) {
+            drawGroups(graphics, textX);
+        } else {
+            this.page = 0;
+            drawOverview(graphics, textX);
+        }
+        if (this.page > 0) {
+            graphics.text(this.font, Component.translatable("feast_dominion.wellbeing.back"), textX, 152, 0, false);
+        }
+        if (this.page < this.lastPage()) {
+            graphics.text(this.font, Component.translatable("feast_dominion.wellbeing.next"), textX + 90, 152, 0, false);
+        }
+    }
+
+    private DietMemory diet() {
+        if (this.minecraft != null && this.minecraft.player != null) {
+            return Services.GROUPS.memory(this.minecraft.player);
+        }
+        return DietMemory.start();
+    }
+
+    private void drawOverview(GuiGraphicsExtractor graphics, int textX) {
         int y = 18;
         graphics.text(this.font, this.title, textX, y, 0, false);
         y += 16;
@@ -137,62 +162,55 @@ public final class WellbeingBookScreen extends Screen {
                     0,
                     false
             );
+            y += 16;
         }
-        y += 14;
         boolean wellFed = true;
         for (FoodGroup group : FoodGroup.values()) {
-            int points = diet.points(group);
-            DietBand band = Wellness.band(points);
-            if (band != DietBand.HIGH) {
+            if (Wellness.band(diet.points(group)) != DietBand.HIGH) {
                 wellFed = false;
             }
-            Component name = Component.translatable("feast_dominion.wellbeing.group." + group.name().toLowerCase());
-            Component line = band == DietBand.LOW
-                    ? Component.translatable(
-                            "feast_dominion.wellbeing.line.low",
-                            name,
-                            points,
-                            Wellness.POINTS,
-                            Component.translatable("feast_dominion.wellbeing.trouble." + group.name().toLowerCase())
-                    )
-                    : Component.translatable("feast_dominion.wellbeing.line", name, points, Wellness.POINTS);
-            graphics.text(this.font, line, textX, y, 0, false);
-            y += 10;
         }
         if (wellFed) {
-            graphics.text(this.font, Component.translatable("feast_dominion.wellbeing.well_fed"), textX, y + 4, 0, false);
-        }
-        if (HealthIncreaseFeature.instance().enabled()) {
-            graphics.text(this.font, Component.translatable("feast_dominion.wellbeing.next"), textX + 90, 152, 0, false);
+            graphics.text(this.font, Component.translatable("feast_dominion.wellbeing.well_fed"), textX, y, 0, false);
         }
     }
 
-    private void drawVariety(GuiGraphicsExtractor graphics, int textX) {
+    private void drawGroups(GuiGraphicsExtractor graphics, int textX) {
+        DietMemory diet = this.diet();
+        int y = 18;
+        for (FoodGroup group : FoodGroup.values()) {
+            Component name = Component.translatable("feast_dominion.wellbeing.group." + group.name().toLowerCase());
+            graphics.text(this.font, name, textX, y, 0, false);
+            HungerBar.draw(graphics, textX, y + 9, diet.points(group));
+            y += 18;
+        }
+    }
+
+    private void drawHealth(GuiGraphicsExtractor graphics, int textX) {
         VarietyView.Snapshot variety = VarietyView.current();
         int y = 18;
         graphics.text(this.font, Component.translatable("feast_dominion.wellbeing.variety"), textX, y, 0, false);
-        y += 20;
-        graphics.text(this.font, Component.translatable(
-                "feast_dominion.wellbeing.today", variety.today(), Variety.DAY_CAP
-        ), textX, y, 0, false);
-        y += 14;
-        graphics.text(this.font, Component.translatable(
-                "feast_dominion.wellbeing.week", variety.week(), Variety.WEEK_CAP
-        ), textX, y, 0, false);
-        y += 14;
-        graphics.text(this.font, Component.translatable(
-                "feast_dominion.wellbeing.month", variety.month(), Variety.MONTH_CAP
-        ), textX, y, 0, false);
-        y += 18;
+        y += 16;
+        y = drawWindow(graphics, textX, y, "feast_dominion.wellbeing.today", variety.today());
+        y = drawWindow(graphics, textX, y, "feast_dominion.wellbeing.week", variety.week());
+        y = drawWindow(graphics, textX, y, "feast_dominion.wellbeing.month", variety.month());
+        y += 6;
         graphics.text(this.font, Component.translatable(
                 "feast_dominion.wellbeing.hearts", Variety.formatHearts(variety.hearts())
         ), textX, y, 0, false);
-        graphics.text(this.font, Component.translatable("feast_dominion.wellbeing.back"), textX, 152, 0, false);
+        y += 12;
         graphics.text(this.font, Component.translatable(
                 "feast_dominion.wellbeing.weights",
                 variety.dayWeight(),
                 variety.weekWeight(),
                 variety.monthWeight()
-        ), textX, 168, 0, false);
+        ), textX, y, 0, false);
+    }
+
+    private int drawWindow(GuiGraphicsExtractor graphics, int textX, int y, String label, int points) {
+        graphics.text(this.font, Component.translatable(label), textX, y, 0, false);
+        y += 10;
+        HungerBar.draw(graphics, textX, y, points);
+        return y + 12;
     }
 }
