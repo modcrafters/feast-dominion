@@ -91,7 +91,7 @@ Hearts use halves. 7.5 is 15 health points. The bar shows that.
 
 ## The book
 
-The wellbeing book, the one beside the recipe book, gains a second page while this feature is on. The first page stays thirst and the seven bands. The second page shows the three counts and the hearts they are worth right now:
+The wellbeing book is replaced by the board in `2026-11-16-wellbeing-board-design.md`. While this feature is on, that board's right column shows the three windows as food icons and empty slots, then the hearts and the weights. The counts are still:
 
 - Today, as `2 / 3`
 - This week, as `4 / 10`
@@ -100,7 +100,7 @@ The wellbeing book, the one beside the recipe book, gains a second page while th
 
 A note along the bottom gives the weights, day then week then month, as `50 · 30 · 20`. It uses the configured numbers, so `50 · 30 · 30` shows when that is what the file says. (Face: "sure... as a bottom note or something".)
 
-Corner buttons turn the page, the way a written book does. **(my call)** With Spice of Life installed there is no second page and no buttons. (Face: "need a page in the book to show these numbers... only if SoL not installed".) The page does not list which foods were eaten.
+With Spice of Life installed there is no meals column. (Face: "need a page in the book to show these numbers... only if SoL not installed".) The board shows the foods that fill these caps. It does not list foods older than the month.
 
 ## Out of scope
 
