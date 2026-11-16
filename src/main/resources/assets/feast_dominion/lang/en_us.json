@@ -6,7 +6,7 @@
   "feast_dominion.wellbeing.thirst": "Thirst",
   "feast_dominion.wellbeing.line": "%s: %s / %s",
   "feast_dominion.wellbeing.line.low": "%s: %s / %s, %s",
-  "feast_dominion.wellbeing.well_fed": "All seven high: well fed.",
+  "feast_dominion.wellbeing.well_fed": "Well fed",
   "feast_dominion.wellbeing.next": "Next",
   "feast_dominion.wellbeing.back": "Back",
   "feast_dominion.wellbeing.variety": "Recent meals",

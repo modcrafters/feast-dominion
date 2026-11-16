@@ -10,7 +10,7 @@ After publishing, the action commits the next development version and changelog 
 
 - The seven food groups start at half. A meal fills the groups in it, and older meals drop out once you have eaten eighty hunger since then. Milk, and anything else with no hunger, counts as four hunger.
 - Hearts follow those groups. Three groups with four hunger each fill the day, five groups with twelve fill the week, and all seven with twenty-eight fill the month. Hunger past that adds nothing, so more berries do not count once fruit is full. Dying keeps the groups and the hearts. Set `reset_lean_on_death` to true in `config/feast_dominion.properties` and a death clears both, and rolls a different lean.
-- The wellbeing book opens on the lean and thirst, then the seven food groups. Each group is its name, then a full row of hunger icons. Without Spice of Life, a third page shows the day, the week, and the month the same way.
+- The wellbeing board is one screen. It shows the lean, thirst as droplets, and each food group as its name, a row of marks, and a word. While Spice of Life is absent, that same screen shows recent meals as slots.
 
 - Quench is the reserve drawn as an outline on the thirst droplets. It spends before thirst falls. A new life starts with that reserve full, and a second outline appears once it passes a full bar. A drink's tooltip shows the quench it restores the same way.
 - Drink a water bottle as usual. Use a water bucket in the air, or while sneaking, and it becomes an empty bucket. Both restore one drink of thirst. The bucket fills three times as much quench.

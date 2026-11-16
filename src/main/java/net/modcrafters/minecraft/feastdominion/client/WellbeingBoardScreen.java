@@ -38,6 +38,8 @@ public final class WellbeingBoardScreen extends Screen {
     private static final int COLUMNS = 10;
     private static final int ROW = 14;
     private static final int PAD = 10;
+    /** Keeps the paper off the edge after automatic GUI scale, which can be 320 by 240. */
+    private static final int MARGIN = 4;
 
     private final Screen parent;
 
@@ -101,16 +103,23 @@ public final class WellbeingBoardScreen extends Screen {
         int innerHeight = Math.max(leftHeight, rightHeight);
         int panelWidth = innerWidth + PAD * 2;
         int panelHeight = innerHeight + PAD * 2;
-        int panelX = Math.max(4, (this.width - panelWidth) / 2);
-        int panelY = Math.max(4, (this.height - panelHeight) / 2);
-        graphics.fill(panelX, panelY, panelX + panelWidth, panelY + panelHeight, EDGE);
-        graphics.fill(panelX + 2, panelY + 2, panelX + panelWidth - 2, panelY + panelHeight - 2, PAPER);
+        // Ten meal cells plus the name, marks, and trouble text are wider than 320. Shrink the panel.
+        float scale = fitScale(this.width, this.height, panelWidth, panelHeight);
+        float originX = fitOrigin(this.width, panelWidth, scale);
+        float originY = fitOrigin(this.height, panelHeight, scale);
+        pushFit(graphics, originX, originY, scale);
+        try {
+            graphics.fill(0, 0, panelWidth, panelHeight, EDGE);
+            graphics.fill(2, 2, panelWidth - 2, panelHeight - 2, PAPER);
 
-        int x = panelX + PAD;
-        int y = panelY + PAD;
-        this.drawLeft(graphics, x, y, nameColumn, points, fed);
-        if (meals) {
-            this.drawMeals(graphics, x + leftWidth + gap, y);
+            int x = PAD;
+            int y = PAD;
+            this.drawLeft(graphics, x, y, nameColumn, points, fed);
+            if (meals) {
+                this.drawMeals(graphics, x + leftWidth + gap, y);
+            }
+        } finally {
+            popFit(graphics);
         }
     }
 
@@ -240,6 +249,43 @@ public final class WellbeingBoardScreen extends Screen {
             return ItemStack.EMPTY;
         }
         return new ItemStack(item);
+    }
+
+    /** Largest scale that keeps the panel inside the GUI, and never larger than one. */
+    private static float fitScale(int guiWidth, int guiHeight, int panelWidth, int panelHeight) {
+        float roomX = guiWidth - MARGIN * 2f;
+        float roomY = guiHeight - MARGIN * 2f;
+        if (panelWidth <= 0 || panelHeight <= 0 || roomX <= 0f || roomY <= 0f) {
+            return 1f;
+        }
+        return Math.min(1f, Math.min(roomX / panelWidth, roomY / panelHeight));
+    }
+
+    /** Centers the scaled panel, and keeps at least {@link #MARGIN} pixels of the GUI around it. */
+    private static float fitOrigin(int gui, int panel, float scale) {
+        if (scale >= 1f) {
+            return Math.max(MARGIN, (gui - panel) / 2);
+        }
+        return Math.max(MARGIN, (gui - panel * scale) / 2f);
+    }
+
+    private static void pushFit(GuiGraphicsExtractor graphics, float x, float y, float scale) {
+        //? if >=1.21.6 {
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
+        //?} else {
+        /*graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0);
+        graphics.pose().scale(scale, scale, 1.0F);
+        *///?}
+    }
+
+    private static void popFit(GuiGraphicsExtractor graphics) {
+        //? if >=1.21.6 {
+        graphics.pose().popMatrix();
+        //?} else
+        //graphics.pose().popPose();
     }
 
     private int leftHeight(boolean fed) {
