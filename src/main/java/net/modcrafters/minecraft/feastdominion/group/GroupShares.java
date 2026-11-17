@@ -2,7 +2,7 @@ package net.modcrafters.minecraft.feastdominion.group;
 
 import net.modcrafters.minecraft.feastdominion.wellness.FoodGroup;
 
-/** How much of a food sits in each of the seven groups, from 0 to 1. */
+/** How much of a food sits in each group, from 0 to 1. */
 public final class GroupShares {
     public static final GroupShares EMPTY = new GroupShares(new float[FoodGroup.values().length]);
 

@@ -28,6 +28,9 @@ public final class GroupFiles {
                 values[group.ordinal()] = object.get(key).getAsFloat();
             }
         }
+        if (object.has("legumes") && object.get("legumes").isJsonPrimitive()) {
+            values[FoodGroup.VEGETABLES.ordinal()] += object.get("legumes").getAsFloat();
+        }
         return GroupShares.from(values);
     }
 }

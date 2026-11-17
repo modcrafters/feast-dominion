@@ -1,6 +1,6 @@
 # Feast Dominion
 
-A Minecraft Java mod for Fabric and NeoForge. The body keeps its own vigil. Food has a taste, a thirst value, and one or two ingredient categories. The player has one taste they lean toward, a thirst that can run dry, and a recent memory of seven kinds of food. A lean that matches the meal fills them better. A category that falls very low curses them. All seven high, and they are well fed.
+A Minecraft Java mod for Fabric and NeoForge. The body keeps its own vigil. Food has a taste, a thirst value, and one or two ingredient categories. The player has one taste they lean toward, a thirst that can run dry, and a recent memory of six kinds of food. A lean that matches the meal fills them better. A category that falls very low curses them. All six high, and they are well fed.
 
 ## Import and run in IntelliJ IDEA
 

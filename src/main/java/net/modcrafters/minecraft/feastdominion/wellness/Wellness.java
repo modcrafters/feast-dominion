@@ -25,7 +25,7 @@ public final class Wellness {
         return DietBand.MIDDLE;
     }
 
-    /** Low is empty, middle is half a health bar, high is full. The bar shows the median of the seven. */
+    /** Low is empty, middle is half a health bar, high is full. The bar shows the median of the groups. */
     public static int progress(FoodGroup group) {
         return switch (band(group)) {
             case LOW -> 0;

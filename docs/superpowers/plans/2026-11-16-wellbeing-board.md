@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Open a two-column wellbeing board from the inventory button, with the seven groups on the left and food slots for today, the week, and the month on the right.
+**Goal:** Open a two-column wellbeing board from the inventory button, with the food groups on the left and food cells for today, the week, and the month on the right.
 
 **Architecture:** The food log gains the item id and the day beside the hunger it already stores. A pure window function turns that list into three capped lists. The variety packet carries those lists, and a new screen draws them. The heart score is untouched.
 

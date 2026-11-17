@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.ArrayList;
 import java.util.List;
 
-/** The recent meals saved on the player. The seven counts are that list. */
+/** The recent meals saved on the player. The group counts are that list. */
 public record DietMemory(List<DietLevels.Meal> meals) {
     public DietMemory {
         meals = List.copyOf(meals == null ? List.of() : meals);

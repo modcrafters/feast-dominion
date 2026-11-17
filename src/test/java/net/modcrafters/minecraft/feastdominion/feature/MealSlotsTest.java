@@ -37,13 +37,15 @@ class MealSlotsTest {
     }
 
     @Test
-    void todayKeepsTheThreeNewest() {
+    void todayKeepsEveryFood() {
         List<FoodLog.Eaten> eaten = List.of(
                 new FoodLog.Eaten("minecraft:apple", 10),
                 new FoodLog.Eaten("minecraft:beetroot", 10),
                 new FoodLog.Eaten("minecraft:bread", 10),
                 new FoodLog.Eaten("minecraft:carrot", 10));
-        assertEquals(List.of("minecraft:apple", "minecraft:beetroot", "minecraft:bread"), MealSlots.of(eaten, 10).today());
+        assertEquals(
+                List.of("minecraft:apple", "minecraft:beetroot", "minecraft:bread", "minecraft:carrot"),
+                MealSlots.of(eaten, 10).today());
 
         List<FoodLog.Eaten> acrossDays = List.of(
                 new FoodLog.Eaten("minecraft:apple", 10),
@@ -56,11 +58,11 @@ class MealSlotsTest {
     }
 
     @Test
-    void theWeekKeepsTen() {
+    void theWeekKeepsEveryFood() {
         List<FoodLog.Eaten> eaten = new ArrayList<>();
         for (int i = 0; i < 11; i++) {
             eaten.add(new FoodLog.Eaten("minecraft:food_" + i, 10));
         }
-        assertEquals(10, MealSlots.of(eaten, 10).week().size());
+        assertEquals(11, MealSlots.of(eaten, 10).week().size());
     }
 }

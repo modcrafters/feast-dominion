@@ -1,6 +1,6 @@
 # Recent variety and max health
 
-Design agreed with Face on 2026-11-09. This replaces the "no health bonus" line in the private design for the case where Spice of Life: Carrot Edition is absent. Taste, thirst, and the seven categories stay as they are.
+Design agreed with Face on 2026-11-09. This replaces the "no health bonus" line in the private design for the case where Spice of Life: Carrot Edition is absent. Taste and thirst stay as they are. The categories are the six groups, and peas, beans, and peanuts count as vegetables.
 
 ## Why
 
@@ -91,17 +91,17 @@ Hearts use halves. 7.5 is 15 health points. The bar shows that.
 
 ## The book
 
-The wellbeing book is replaced by the board in `2026-11-16-wellbeing-board-design.md`. While this feature is on, that board's right column shows the three windows as food icons and empty slots, then the hearts and the weights. The counts are still:
+The wellbeing book is replaced by the board in `2026-11-16-wellbeing-board-design.md`. While this feature is on, that board's right column shows the lean, then the three windows as food icons and empty cells, then the hearts. The counts are still:
 
 - Today, as `2 / 3`
 - This week, as `4 / 10`
 - This month, as `6 / 20`
 - Hearts, as the number the score currently gives, halves included
 
-A note along the bottom gives the weights, day then week then month, as `50 · 30 · 20`. It uses the configured numbers, so `50 · 30 · 30` shows when that is what the file says. (Face: "sure... as a bottom note or something".)
+The weights stay in the heart score. The board does not print them.
 
 With Spice of Life installed there is no meals column. (Face: "need a page in the book to show these numbers... only if SoL not installed".) The board shows the foods that fill these caps. It does not list foods older than the month.
 
 ## Out of scope
 
-Taste, thirst, the seven categories, and Well Fed. Changing the lean. A year window. Configurable caps or window lengths. Running this beside Spice of Life. A list of every remembered food.
+Taste, thirst, the six categories, and Well Fed. Changing the lean. A year window. Configurable caps or window lengths. Running this beside Spice of Life. A list of every remembered food.

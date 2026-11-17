@@ -70,6 +70,14 @@ class DietLevelsTest {
     }
 
     @Test
+    void anOldLegumeShareCountsAsVegetables() {
+        float[] saved = new float[] {0.0F, 0.0F, 0.0F, 0.0F, 0.2F, 0.0F, 0.5F};
+        DietLevels.Meal meal = new DietLevels.Meal(4, saved);
+        assertEquals(0.7F, meal.shares()[FoodGroup.VEGETABLES.ordinal()], 0.001F);
+        assertEquals(FoodGroup.values().length, meal.shares().length);
+    }
+
+    @Test
     void sixIsLowAndFourteenIsHigh() {
         assertEquals(DietBand.LOW, Wellness.band(6));
         assertEquals(DietBand.MIDDLE, Wellness.band(7));

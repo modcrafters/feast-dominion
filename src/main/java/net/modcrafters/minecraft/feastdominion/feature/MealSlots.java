@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/** Item ids for today, the week, and the month. Newest day first, then item id, cut at the cap. */
+/** Item ids for today, the week, and the month. Newest day first, then item id. Today and the week keep every food. The month stops at {@link #MONTH}. */
 public final class MealSlots {
-    public static final int TODAY = 3;
-    public static final int WEEK = 10;
     public static final int MONTH = 20;
 
     private MealSlots() {
@@ -24,8 +22,8 @@ public final class MealSlots {
     public static Windows of(List<FoodLog.Eaten> eaten, long today) {
         List<FoodLog.Eaten> source = eaten == null ? List.of() : eaten;
         return new Windows(
-                window(source, today, 1, TODAY),
-                window(source, today, Variety.WEEK_DAYS, WEEK),
+                window(source, today, 1, Integer.MAX_VALUE),
+                window(source, today, Variety.WEEK_DAYS, Integer.MAX_VALUE),
                 window(source, today, Variety.MONTH_DAYS, MONTH));
     }
 

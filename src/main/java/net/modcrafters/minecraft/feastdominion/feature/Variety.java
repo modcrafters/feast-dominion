@@ -15,7 +15,8 @@ public final class Variety {
     public static final int DAY_HUNGER = 4;
     public static final int WEEK_GROUPS = 5;
     public static final int WEEK_HUNGER = 12;
-    public static final int MONTH_GROUPS = 7;
+    /** Every group. */
+    public static final int MONTH_GROUPS = FoodGroup.values().length;
     public static final int MONTH_HUNGER = 28;
 
     private Variety() {

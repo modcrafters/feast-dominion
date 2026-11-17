@@ -42,6 +42,7 @@ public abstract class FoodMemoryMixin {
             this.feast$hand = ((LivingEntity) (Object) this).getUsedItemHand();
             HealthIncreaseFeature.instance().consume(player, this.useItem);
             DietClock.eat(player, this.useItem);
+            HealthIncreaseFeature.instance().apply(player);
         }
     }
 

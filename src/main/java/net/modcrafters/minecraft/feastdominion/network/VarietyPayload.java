@@ -28,6 +28,8 @@ public record VarietyPayload(VarietyView.Snapshot snapshot) implements CustomPac
                 writeItems(buf, snapshot.todayItems());
                 writeItems(buf, snapshot.weekItems());
                 writeItems(buf, snapshot.monthItems());
+                buf.writeVarInt(snapshot.tasteMarks());
+                buf.writeVarInt(snapshot.tasteMask());
             },
             buf -> new VarietyPayload(new VarietyView.Snapshot(
                     buf.readVarInt(),
@@ -39,7 +41,9 @@ public record VarietyPayload(VarietyView.Snapshot snapshot) implements CustomPac
                     buf.readVarInt(),
                     readItems(buf),
                     readItems(buf),
-                    readItems(buf)
+                    readItems(buf),
+                    buf.readVarInt(),
+                    buf.readVarInt()
             ))
     );
 

@@ -15,12 +15,7 @@ public record FoodLog(List<FoodLog.Day> days, List<FoodLog.Eaten> eaten) {
 
     public record Day(long day, float[] hunger) {
         public Day {
-            float[] copy = new float[FoodGroup.values().length];
-            for (int i = 0; i < copy.length; i++) {
-                float value = hunger != null && i < hunger.length ? hunger[i] : 0.0F;
-                copy[i] = value < 0.0F ? 0.0F : value;
-            }
-            hunger = copy;
+            hunger = FoodGroup.copy(hunger);
         }
 
         private Day plus(float[] add) {

@@ -5,7 +5,7 @@ import net.modcrafters.minecraft.feastdominion.group.GroupShares;
 import java.util.ArrayList;
 import java.util.List;
 
-/** The seven group counts. A new life is half full, and a meal replaces that much of the recent diet. */
+/** The group counts. A new life is half full, and a meal replaces that much of the recent diet. */
 public final class DietLevels {
     /** Hunger in the recent diet. Older meals leave once newer ones fill this. */
     public static final int WINDOW = 80;
@@ -18,10 +18,11 @@ public final class DietLevels {
     /** One meal. {@code shares} is how much of it sits in each group. Newest meals are kept first. */
     public record Meal(int hunger, float[] shares) {
         public Meal {
-            float[] copy = new float[FoodGroup.values().length];
+            float[] copy = FoodGroup.copy(shares);
             for (int i = 0; i < copy.length; i++) {
-                float value = shares != null && i < shares.length ? shares[i] : 0.0F;
-                copy[i] = value < 0.0F ? 0.0F : value;
+                if (copy[i] < 0.0F) {
+                    copy[i] = 0.0F;
+                }
             }
             shares = copy;
             if (hunger < 0) {
