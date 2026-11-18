@@ -1,7 +1,7 @@
 package net.modcrafters.minecraft.feastdominion.mixin;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
-import net.modcrafters.minecraft.feastdominion.client.WellbeingBookScreen;
+import net.modcrafters.minecraft.feastdominion.client.WellbeingBoardScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -42,11 +42,11 @@ public abstract class InventoryBookMixin {
                         Identifier.fromNamespaceAndPath(Constants.MOD_ID, "wellbeing/book_highlighted")
                 ),
                 button -> {
-                    Screen book = new WellbeingBookScreen((InventoryScreen) (Object) this);
+                    Screen board = new WellbeingBoardScreen((InventoryScreen) (Object) this);
                     //? if >=26.1 {
-                    minecraft.setScreenAndShow(book);
+                    minecraft.setScreenAndShow(board);
                     //?} else
-                    //minecraft.setScreen(book);
+                    //minecraft.setScreen(board);
                 },
                 name
         );

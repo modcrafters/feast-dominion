@@ -9,18 +9,13 @@ import net.modcrafters.minecraft.feastdominion.wellness.FoodGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Hunger eaten in each group, kept by the day it was eaten. */
-public record FoodLog(List<FoodLog.Day> days) {
-    public static final FoodLog EMPTY = new FoodLog(List.of());
+/** Hunger eaten in each group, and the items, kept by the day they were eaten. */
+public record FoodLog(List<FoodLog.Day> days, List<FoodLog.Eaten> eaten) {
+    public static final FoodLog EMPTY = new FoodLog(List.of(), List.of());
 
     public record Day(long day, float[] hunger) {
         public Day {
-            float[] copy = new float[FoodGroup.values().length];
-            for (int i = 0; i < copy.length; i++) {
-                float value = hunger != null && i < hunger.length ? hunger[i] : 0.0F;
-                copy[i] = value < 0.0F ? 0.0F : value;
-            }
-            hunger = copy;
+            hunger = FoodGroup.copy(hunger);
         }
 
         private Day plus(float[] add) {
@@ -32,6 +27,9 @@ public record FoodLog(List<FoodLog.Day> days) {
         }
     }
 
+    public record Eaten(String item, long day) {
+    }
+
     private static final Codec<float[]> HUNGER = Codec.FLOAT.listOf().xmap(FoodLog::hungerOf, FoodLog::hungerList);
 
     private static final Codec<Day> DAY_CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -39,13 +37,20 @@ public record FoodLog(List<FoodLog.Day> days) {
             HUNGER.fieldOf("hunger").forGetter(Day::hunger)
     ).apply(instance, Day::new));
 
+    private static final Codec<Eaten> EATEN_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("item").forGetter(Eaten::item),
+            Codec.LONG.fieldOf("day").forGetter(Eaten::day)
+    ).apply(instance, Eaten::new));
+
     public static final MapCodec<FoodLog> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DAY_CODEC.listOf().optionalFieldOf("days", List.of()).forGetter(FoodLog::days)
+            DAY_CODEC.listOf().optionalFieldOf("days", List.of()).forGetter(FoodLog::days),
+            EATEN_CODEC.listOf().optionalFieldOf("eaten", List.of()).forGetter(FoodLog::eaten)
     ).apply(instance, FoodLog::new));
     public static final Codec<FoodLog> CODEC = MAP_CODEC.codec();
 
     public FoodLog {
         days = List.copyOf(days == null ? List.of() : days);
+        eaten = List.copyOf(eaten == null ? List.of() : eaten);
     }
 
     /** Adds the meal to that day and drops days older than a month. */
@@ -71,7 +76,36 @@ public record FoodLog(List<FoodLog.Day> days) {
         if (!found) {
             next.add(new Day(day, add));
         }
-        return new FoodLog(next);
+        return new FoodLog(next, this.eaten);
+    }
+
+    /**
+     * Remembers this item on that day.
+     * A blank item is ignored. The same item replaces its day. An item a month old or older is dropped.
+     */
+    public FoodLog eat(long day, String item) {
+        if (item == null || item.isBlank()) {
+            return this;
+        }
+        List<Eaten> next = new ArrayList<>();
+        boolean found = false;
+        for (Eaten entry : this.eaten) {
+            if (item.equals(entry.item())) {
+                if (!found) {
+                    next.add(new Eaten(item, day));
+                    found = true;
+                }
+                continue;
+            }
+            long age = day - entry.day();
+            if (age < Variety.MONTH_DAYS) {
+                next.add(entry);
+            }
+        }
+        if (!found) {
+            next.add(new Eaten(item, day));
+        }
+        return new FoodLog(this.days, next);
     }
 
     private static float[] hungerOf(List<Float> listed) {

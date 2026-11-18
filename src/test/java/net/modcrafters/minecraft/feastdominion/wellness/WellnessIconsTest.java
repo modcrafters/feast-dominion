@@ -11,7 +11,7 @@ class WellnessIconsTest {
             assertEquals(DietBand.MIDDLE, Wellness.band(group));
             assertEquals(WellnessIcons.Fill.HALF, WellnessIcons.fill(Wellness.band(group)));
         }
-        assertEquals(7, FoodGroup.values().length);
+        assertEquals(6, FoodGroup.values().length);
         assertEquals(10, Wellness.progress(FoodGroup.MEAT));
         assertEquals(10, Wellness.median());
     }

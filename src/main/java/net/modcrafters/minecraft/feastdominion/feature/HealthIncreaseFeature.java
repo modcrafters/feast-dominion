@@ -5,7 +5,10 @@ import net.modcrafters.minecraft.feastdominion.FeastConfig;
 import net.modcrafters.minecraft.feastdominion.group.GroupIndex;
 import net.modcrafters.minecraft.feastdominion.group.GroupShares;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
+import net.modcrafters.minecraft.feastdominion.taste.TasteIndex;
 import net.modcrafters.minecraft.feastdominion.wellness.DietLevels;
+import net.modcrafters.minecraft.feastdominion.wellness.DietMemory;
+import net.modcrafters.minecraft.feastdominion.wellness.FoodGroup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -76,9 +79,9 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
         }
         FoodProperties food = stack.get(DataComponents.FOOD);
         int nutrition = food == null ? 0 : food.nutrition();
-        FoodLog log = Services.DIET.log(player).remember(day(player), shares, DietLevels.serving(nutrition));
+        FoodLog log = Services.DIET.log(player).remember(day(player), shares, DietLevels.serving(nutrition))
+                .eat(day(player), id);
         Services.DIET.setLog(player, log);
-        apply(player);
     }
 
     /** Writes the hearts onto the player, or takes the modifier off when Spice of Life owns the bar. */
@@ -87,11 +90,16 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
         if (health == null) {
             return;
         }
-        if (!enabled() || !(player instanceof ServerPlayer server)) {
+        if (!(player instanceof ServerPlayer server)) {
             health.removeModifier(MODIFIER_ID);
             return;
         }
         VarietyView.Snapshot snapshot = snapshot(server);
+        VarietySync.send(server, snapshot);
+        if (!enabled()) {
+            health.removeModifier(MODIFIER_ID);
+            return;
+        }
         double points = snapshot.hearts() * 2.0 - VANILLA_HEALTH;
         if (points == 0.0) {
             health.removeModifier(MODIFIER_ID);
@@ -103,13 +111,32 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
             ));
         }
         player.setHealth(player.getHealth());
-        VarietySync.send(server, snapshot);
     }
 
     public VarietyView.Snapshot snapshot(ServerPlayer player) {
         HealthSettings settings = FeastConfig.health();
-        Variety.Counts counts = Variety.counts(Services.DIET.log(player), day(player));
-        return VarietyView.Snapshot.of(counts, settings);
+        FoodLog log = Services.DIET.log(player);
+        long today = day(player);
+        if (player.level().getServer() != null) {
+            TasteIndex.ensure(player.level().getServer().getResourceManager());
+        }
+        int tasteMask = Constitution.mask(log, today, TasteIndex::profile);
+        return VarietyView.Snapshot.of(
+                Variety.counts(log, today),
+                settings,
+                MealSlots.of(log.eaten(), today),
+                groupPoints(player),
+                tasteMask
+        );
+    }
+
+    private static int[] groupPoints(ServerPlayer player) {
+        DietMemory memory = Services.GROUPS.memory(player);
+        int[] points = new int[FoodGroup.values().length];
+        for (FoodGroup group : FoodGroup.values()) {
+            points[group.ordinal()] = memory.points(group);
+        }
+        return points;
     }
 
     static long day(ServerPlayer player) {

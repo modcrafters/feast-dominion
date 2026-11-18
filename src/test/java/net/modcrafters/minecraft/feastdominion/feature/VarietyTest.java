@@ -1,8 +1,11 @@
 package net.modcrafters.minecraft.feastdominion.feature;
 
 import net.modcrafters.minecraft.feastdominion.group.GroupShares;
+import net.modcrafters.minecraft.feastdominion.wellness.DietLevels;
 import net.modcrafters.minecraft.feastdominion.wellness.FoodGroup;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VarietyTest {
     @Test
-    void nothingRememberedIsTheFloor() {
-        assertEquals(7.5, hearts(FoodLog.EMPTY, 10, HealthSettings.DEFAULT), 0.001);
+    void aNewLifeWithNothingEatenSitsAboveTheFloor() {
+        assertEquals(11.25, hearts(FoodLog.EMPTY, 10, HealthSettings.DEFAULT), 0.001);
     }
 
     @Test
@@ -23,9 +26,9 @@ class VarietyTest {
         Variety.Counts counts = Variety.counts(log, 10);
         assertEquals(1.0, counts.today(), 0.001);
         assertEquals(12.0 / 60.0, counts.week(), 0.001);
-        assertEquals(12.0 / 196.0, counts.month(), 0.001);
-        double score = (50 + 30 * (12.0 / 60.0) + 20 * (12.0 / 196.0)) / 100.0;
-        assertEquals(7.5 + score * 12.5, hearts(log, 10, HealthSettings.DEFAULT), 0.001);
+        double month = (double) Variety.MONTH_GROUPS * Variety.MONTH_HUNGER;
+        assertEquals(12.0 / month, counts.month(), 0.001);
+        assertEquals(12.6857, hearts(log, 10, HealthSettings.DEFAULT), 0.001);
     }
 
     @Test
@@ -50,12 +53,11 @@ class VarietyTest {
                 .remember(10, GroupShares.of(FoodGroup.FRUIT, 1.0F), 4)
                 .remember(10, GroupShares.of(FoodGroup.MEAT, 1.0F), 4)
                 .remember(10, GroupShares.of(FoodGroup.GRAIN, 1.0F), 4);
-        double score = (50 + 30 * (12.0 / 60.0) + 30 * (12.0 / 196.0)) / 110.0;
-        assertEquals(7.5 + score * 12.5, hearts(log, 10, settings), 0.001);
+        assertEquals(12.5714, hearts(log, 10, settings), 0.001);
     }
 
     @Test
-    void everyWindowFullIsTheCeiling() {
+    void fullWindowsWithTheGroupsAtHalfStayShort() {
         FoodLog log = FoodLog.EMPTY;
         for (FoodGroup group : FoodGroup.values()) {
             log = log.remember(10, GroupShares.of(group, 1.0F), Variety.MONTH_HUNGER);
@@ -64,7 +66,18 @@ class VarietyTest {
         assertEquals(1.0, counts.today(), 0.001);
         assertEquals(1.0, counts.week(), 0.001);
         assertEquals(1.0, counts.month(), 0.001);
-        assertEquals(20, hearts(log, 10, HealthSettings.DEFAULT), 0.001);
+        assertEquals(13.75, hearts(log, 10, HealthSettings.DEFAULT), 0.001);
+    }
+
+    @Test
+    void everyPartFullIsTheCeiling() {
+        FoodLog log = FoodLog.EMPTY;
+        int[] groups = new int[FoodGroup.values().length];
+        Arrays.fill(groups, 20);
+        for (FoodGroup group : FoodGroup.values()) {
+            log = log.remember(10, GroupShares.of(group, 1.0F), Variety.MONTH_HUNGER);
+        }
+        assertEquals(20, HealthSettings.DEFAULT.hearts(Variety.counts(log, 10), groups, 1), 0.001);
     }
 
     @Test
@@ -73,7 +86,7 @@ class VarietyTest {
         Variety.Counts counts = Variety.counts(log, 107);
         assertEquals(0, counts.today(), 0.001);
         assertEquals(0, counts.week(), 0.001);
-        assertEquals(4.0 / 196.0, counts.month(), 0.001);
+        assertEquals(4.0 / (Variety.MONTH_GROUPS * Variety.MONTH_HUNGER), counts.month(), 0.001);
         assertEquals(0, Variety.counts(log, 128).month(), 0.001);
     }
 
@@ -87,7 +100,8 @@ class VarietyTest {
         absent.init();
     }
 
+    /** The food log alone leaves the group bars at the half they start on, and no taste has shown up. */
     private static double hearts(FoodLog log, long today, HealthSettings settings) {
-        return settings.hearts(Variety.counts(log, today));
+        return settings.hearts(Variety.counts(log, today), DietLevels.starting(), 0);
     }
 }

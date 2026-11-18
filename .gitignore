@@ -4,6 +4,8 @@ AGENTS.md
 docs/DESIGN.md
 docs/ROADMAP.md
 .cursor/
+.superpowers/
+.worktrees/
 # build
 .gradle/
 build/

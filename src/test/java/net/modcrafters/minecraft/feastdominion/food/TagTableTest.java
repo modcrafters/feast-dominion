@@ -17,7 +17,7 @@ class TagTableTest {
         try (InputStream in = TagTableTest.class.getResourceAsStream("/data/feast_dominion/feast/tag/tags.json")) {
             TagTable.Tables tables = TagTable.read(new String(in.readAllBytes(), StandardCharsets.UTF_8));
             assertEquals(100, tables.groups().get("c:vegetables").percent(FoodGroup.VEGETABLES));
-            assertEquals(100, tables.groups().get("c:peanuts").percent(FoodGroup.LEGUMES));
+            assertEquals(100, tables.groups().get("c:peanuts").percent(FoodGroup.VEGETABLES));
             assertEquals(100, tables.groups().get("c:nuts").percent(FoodGroup.FRUIT));
             assertEquals(List.of(Taste.SAVORY, Taste.FAT), tables.tastes().get("c:nuts").shown());
             assertEquals(List.of(Taste.SALTY), tables.tastes().get("c:dusts/salt").shown());

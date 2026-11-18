@@ -69,7 +69,7 @@ class IngredientTableTest {
             assertEquals(FoodGroup.VEGETABLES, group(names, "pamhc2crops:lettuceitem"));
             assertEquals(FoodGroup.VEGETABLES, group(names, "croptopia:lettuce"));
             assertEquals(FoodGroup.VEGETABLES, group(names, "example:sweet_potato"));
-            assertEquals(FoodGroup.LEGUMES, group(names, "pamhc2crops:peanutitem"));
+            assertEquals(FoodGroup.VEGETABLES, group(names, "pamhc2crops:peanutitem"));
             assertEquals(FoodGroup.FRUIT, group(names, "pamhc2trees:almonditem"));
             assertEquals(List.of(Taste.SAVORY, Taste.SPICY), IngredientTable.find(names.tastes(), "pamhc2crops:chilipepperitem").shown());
             assertNull(IngredientTable.find(names.groups(), "croptopia:lettuce_seed"));
