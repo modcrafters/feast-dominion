@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.client.SaturationIcons.Mark;
 import net.modcrafters.minecraft.feastdominion.compat.AppleSkin;
 import net.modcrafters.minecraft.feastdominion.compat.FarmersDelight;
@@ -15,10 +15,10 @@ import net.minecraft.world.entity.player.Player;
 
 /** Saturation marks on the hunger shanks. The art lives next to the other hud sprites. */
 public final class SaturationHud {
-    private static final Identifier FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/saturation_full");
-    private static final Identifier HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/saturation_half");
-    private static final Identifier FULL_OVER = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/saturation_full_2");
-    private static final Identifier HALF_OVER = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/saturation_half_2");
+    private static final Identifier FULL = FeastIds.of("hud/saturation_full");
+    private static final Identifier HALF = FeastIds.of("hud/saturation_half");
+    private static final Identifier FULL_OVER = FeastIds.of("hud/saturation_full_2");
+    private static final Identifier HALF_OVER = FeastIds.of("hud/saturation_half_2");
     private static final int OVER = 11;
     private static int foodRight;
     private static int foodTop;

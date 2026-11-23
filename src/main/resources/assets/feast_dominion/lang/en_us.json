@@ -35,6 +35,7 @@
   "feast_dominion.wellbeing.hearts.window": "%s: the fullest %s groups, %s hunger each, over %s days.",
   "feast_dominion.wellbeing.hearts.cap": "Hunger past a group's share adds nothing.",
   "feast_dominion.wellbeing.meal.taste": "%s %s%%",
+  "feast_dominion.wellbeing.meal.group": "%s %s%%",
   "feast_dominion.wellbeing.meal.hunger": "Hunger: %s",
   "feast_dominion.wellbeing.weights": "%s · %s · %s",
   "feast_dominion.wellbeing.band.middle": "middle",

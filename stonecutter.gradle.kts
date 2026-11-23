@@ -14,7 +14,7 @@ stonecutter parameters {
 
     // The source is written for 26.3; older versions get the old names back. Each replacement turns the
     // first name into the second at and after its version, and back again before it. The version thresholds
-    // are only checked against 1.21.1 and 26.3: confirm them before adding a version in between.
+    // are checked against 1.20.6, 1.21.1, and 26.3: confirm them before adding a version in between.
     replacements {
         string(current.parsed >= "1.21.11") {
             replace("ResourceLocation", "Identifier")

@@ -8,6 +8,10 @@ After publishing, the action commits the next development version and changelog 
 
 ## Unreleased
 
+- NeoForge runs on Minecraft 1.20.6, beside 1.21.1 and 26.3. Fabric stays on 26.3.
+- A container of water or milk drinks like a bucket. Use it in the air, or while sneaking. Looking at a block still places the fluid. Thirst is one drink either way. A bucket fills three times as much quench as a bottle. Milk from the container clears effects, the same as a milk bucket.
+- Hovering a meal on the wellbeing board shows its tastes on one line and its makeup on the next, such as Meat 38%, Vegetables 62%. The two lines use different colors. Hunger stays on its own line.
+- Cheese counts as dairy. Let's Do Meadow cheese slices and wheels do, including sheep, buffalo, goat, warped, amethyst, and grain. A cheese roll counts the cheese beside the bread. Milk in the `c:milk` and `c:milks` tags counts as dairy, including Meadow's sheep, buffalo, goat, and warped wooden milk buckets.
 - Hovering thirst, a food group, the lean, or Well fed names what that row is doing. A quiet group names the trouble it brings when it falls, and that the bar is 10% of hearts.
 - Hearts follow the six group bars, the tastes eaten this month, and recent foods. Each group is 10% of the span, tastes are 20%, and recent foods are 20%. A new life, with every group at half and nothing eaten, has 11.25 hearts. The floor of 7.5 is an empty constitution, and 20 takes full groups, all seven tastes, and full recent windows. The tastes row names sweet, sour, salty, bitter, savory, fat, and spicy. Poison does not count. The row bobs when all seven have shown up, and it adds no curse.
 - The six food groups start at half. Peas, beans, and peanuts count as vegetables. A meal fills the groups in it, and older meals drop out once you have eaten eighty hunger since then. Milk, and anything else with no hunger, counts as four hunger.

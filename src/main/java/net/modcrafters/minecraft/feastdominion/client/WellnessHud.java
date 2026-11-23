@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
 import net.modcrafters.minecraft.feastdominion.wellness.Wellness;
 import net.modcrafters.minecraft.feastdominion.wellness.WellnessIcons;
@@ -12,10 +12,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 public final class WellnessHud {
-    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "wellness");
-    private static final Identifier EMPTY = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/wellness_empty");
-    private static final Identifier HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/wellness_half");
-    private static final Identifier FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/wellness_full");
+    public static final Identifier ID = FeastIds.of("wellness");
+    private static final Identifier EMPTY = FeastIds.of("hud/wellness_empty");
+    private static final Identifier HALF = FeastIds.of("hud/wellness_half");
+    private static final Identifier FULL = FeastIds.of("hud/wellness_full");
     public static final int ROW = 10;
 
     private WellnessHud() {

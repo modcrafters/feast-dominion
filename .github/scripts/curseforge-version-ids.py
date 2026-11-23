@@ -30,7 +30,7 @@ def resolve(versions, types, game, loader, java):
             return None
         return ids.pop()
 
-    # 1.21.1 belongs to minecraft-1-21; 26.3 belongs to minecraft-26-3.
+    # 1.20.6 belongs to minecraft-1-20; 1.21.1 belongs to minecraft-1-21; 26.3 belongs to minecraft-26-3.
     category = "minecraft-" + "-".join(game.split(".")[:2])
     result = [find(game, category), find(loader, "modloader"),
               find("Client", "environment"), find("Server", "environment")]

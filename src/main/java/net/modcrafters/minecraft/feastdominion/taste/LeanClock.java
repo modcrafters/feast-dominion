@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.taste;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.FeastConfig;
 import net.modcrafters.minecraft.feastdominion.feature.FoodLog;
 import net.modcrafters.minecraft.feastdominion.feature.HealthIncreaseFeature;
@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 public final class LeanClock {
     public static final TagKey<Item> RESETS = TagKey.create(
             Registries.ITEM,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "resets_lean")
+            FeastIds.of("resets_lean")
     );
 
     private LeanClock() {

@@ -47,12 +47,15 @@ public class PeacefulFillMixin {
         }
     }
 
+    // 1.20.6 peaceful regen raises hunger and heals. It does not set saturation.
+    //? if >=1.21 {
     @Redirect(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/food/FoodData;setSaturation(F)V"))
     private void feast$saturation(FoodData food, float saturation) {
         if (PeacefulRules.fillHunger(FeastConfig.drainInPeaceful())) {
             food.setSaturation(saturation);
         }
     }
+    //?}
 
     @Redirect(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;heal(F)V"))
     private void feast$heal(Player player, float amount) {

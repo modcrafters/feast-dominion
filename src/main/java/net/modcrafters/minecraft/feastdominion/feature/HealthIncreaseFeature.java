@@ -2,6 +2,7 @@ package net.modcrafters.minecraft.feastdominion.feature;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.FeastConfig;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.group.GroupIndex;
 import net.modcrafters.minecraft.feastdominion.group.GroupShares;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
@@ -31,10 +32,17 @@ import java.util.function.BooleanSupplier;
  */
 public final class HealthIncreaseFeature extends ModDependantFeature {
     public static final String MOD_ID = "solcarrot";
-    public static final Identifier MODIFIER_ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "health_increase");
+    //? if >=1.21 {
+    public static final Identifier MODIFIER_ID = FeastIds.of("health_increase");
+    //?} else {
+    /*public static final java.util.UUID MODIFIER_ID = java.util.UUID.nameUUIDFromBytes(
+            (Constants.MOD_ID + ":health_increase").getBytes(java.nio.charset.StandardCharsets.UTF_8)
+    );
+    private static final String MODIFIER_NAME = Constants.MOD_ID + ":health_increase";
+    *///?}
     public static final TagKey<Item> DRINKS = TagKey.create(
             Registries.ITEM,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "health_drinks")
+            FeastIds.of("health_drinks")
     );
     /** Vanilla max health, in health points. Two points are one heart. */
     private static final double VANILLA_HEALTH = 20;
@@ -84,6 +92,14 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
         Services.DIET.setLog(player, log);
     }
 
+    private static AttributeModifier modifier(double points) {
+        //? if >=1.21 {
+        return new AttributeModifier(MODIFIER_ID, points, AttributeModifier.Operation.ADD_VALUE);
+        //?} else {
+        /*return new AttributeModifier(MODIFIER_ID, MODIFIER_NAME, points, AttributeModifier.Operation.ADD_VALUE);
+        *///?}
+    }
+
     /** Writes the hearts onto the player, or takes the modifier off when Spice of Life owns the bar. */
     public void apply(Player player) {
         AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
@@ -104,11 +120,7 @@ public final class HealthIncreaseFeature extends ModDependantFeature {
         if (points == 0.0) {
             health.removeModifier(MODIFIER_ID);
         } else {
-            health.addOrUpdateTransientModifier(new AttributeModifier(
-                    MODIFIER_ID,
-                    points,
-                    AttributeModifier.Operation.ADD_VALUE
-            ));
+            health.addOrUpdateTransientModifier(modifier(points));
         }
         player.setHealth(player.getHealth());
     }

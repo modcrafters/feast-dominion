@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.mixin;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.client.WellbeingBoardScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ImageButton;
@@ -38,8 +38,8 @@ public abstract class InventoryBookMixin {
                 20,
                 18,
                 new WidgetSprites(
-                        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "wellbeing/book"),
-                        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "wellbeing/book_highlighted")
+                        FeastIds.of("wellbeing/book"),
+                        FeastIds.of("wellbeing/book_highlighted")
                 ),
                 button -> {
                     Screen board = new WellbeingBoardScreen((InventoryScreen) (Object) this);

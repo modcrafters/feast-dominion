@@ -18,10 +18,18 @@ public abstract class SaturationCapMixin {
     @Shadow
     private float saturationLevel;
 
+    // 1.21 clamps the new saturation with Mth.clamp. 1.20.6 uses Math.min.
+    //? if >=1.21 {
     @Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F"))
     private float feast$room(float value, float min, float max) {
         return SaturationRoom.clamp(this.foodLevel, value);
     }
+    //?} else {
+    /*@Redirect(method = "add", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(FF)F"))
+    private float feast$room(float value, float cap) {
+        return SaturationRoom.clamp(this.foodLevel, value);
+    }
+    *///?}
 
     @Inject(method = "setFoodLevel", at = @At("RETURN"))
     private void feast$afterFood(int level, CallbackInfo ci) {

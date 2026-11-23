@@ -121,6 +121,52 @@ class GroupInferenceTest {
     }
 
     @Test
+    void cheeseCountsTheMilkBesideTheRennet() {
+        String rennet = """
+                {"type":"meadow:cooking","ingredients":[{"item":"minecraft:egg"},{"item":"minecraft:salt"}],"result":{"id":"meadow:rennet"}}
+                """;
+        String wheel = """
+                {"type":"meadow:cheese","bucket":{"tag":"c:milks"},"ingredient":{"item":"meadow:rennet"},"result":{"id":"meadow:cheese_wheel"}}
+                """;
+        String slice = """
+                {"type":"minecraft:crafting_shapeless","ingredients":[{"item":"meadow:cheese_wheel"}],"result":{"id":"meadow:cheese_slice"}}
+                """;
+        Map<String, GroupShares> known = GroupInference.infer(
+                Map.of(
+                        "minecraft:egg", GroupShares.of(FoodGroup.EGGS, 1F),
+                        "minecraft:milk_bucket", GroupShares.of(FoodGroup.DAIRY, 1F)
+                ),
+                List.of(recipe("rennet", rennet), recipe("wheel", wheel), recipe("slice", slice)),
+                Map.of("c:milks", List.of("minecraft:milk_bucket", "meadow:wooden_milk_bucket")),
+                Map.of()
+        );
+        GroupShares cheese = known.get("meadow:cheese_slice");
+        assertEquals(100, known.get("meadow:rennet").percent(FoodGroup.EGGS));
+        assertEquals(100, cheese.percent(FoodGroup.DAIRY));
+        assertEquals(0, cheese.percent(FoodGroup.EGGS));
+    }
+
+    @Test
+    void aCheeseRollCountsTheSliceBesideTheBread() {
+        String roll = """
+                {"type":"minecraft:crafting_shaped","pattern":[" # ","#M#"," # "],"key":{"#":{"tag":"c:bread"},"M":{"tag":"c:cheese"}},"result":{"id":"meadow:cheese_roll"}}
+                """;
+        Map<String, GroupShares> known = GroupInference.infer(
+                Map.of(
+                        "minecraft:bread", GroupShares.of(FoodGroup.GRAIN, 1F),
+                        "meadow:cheese_slice", GroupShares.of(FoodGroup.DAIRY, 1F)
+                ),
+                List.of(recipe("roll", roll)),
+                Map.of("c:bread", List.of("minecraft:bread"), "c:cheese", List.of("meadow:cheese_slice")),
+                Map.of("minecraft:bread", 5, "meadow:cheese_slice", 6)
+        );
+        GroupShares cheeseRoll = known.get("meadow:cheese_roll");
+        assertEquals(23, cheeseRoll.percent(FoodGroup.DAIRY));
+        assertEquals(77, cheeseRoll.percent(FoodGroup.GRAIN));
+        assertEquals(0, cheeseRoll.percent(FoodGroup.EGGS));
+    }
+
+    @Test
     void aSliceKeepsThePieAfterSugarDropsOut() {
         String pie = """
                 {"type":"minecraft:crafting_shaped","key":{"a":"minecraft:apple","x":"minecraft:sugar","w":"minecraft:wheat"},"pattern":["a","x","w"],"result":{"id":"farmersdelight:apple_pie"}}

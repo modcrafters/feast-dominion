@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.network;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.feature.VarietyView;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,7 +13,7 @@ import java.util.List;
 /** The three windows, the hearts they are worth, and the weights, for the local player. */
 public record VarietyPayload(VarietyView.Snapshot snapshot) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<VarietyPayload> TYPE = new CustomPacketPayload.Type<>(
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "variety")
+            FeastIds.of("variety")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, VarietyPayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> {

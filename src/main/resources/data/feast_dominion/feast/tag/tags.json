@@ -18,6 +18,8 @@
   "c:cinnamon": { "vegetables":1, "sweet":0.45, "spicy":0.4 },
   "c:cashews": { "fruit":1, "fat":0.55, "savory":0.25 },
   "c:nutmegs": { "fruit":1, "spicy":0.45, "bitter":0.3 },
+  "c:milk": { "dairy":1, "sweet":0.2, "savory":0.15, "fat":0.4 },
+  "c:milks": { "dairy":1, "sweet":0.2, "savory":0.15, "fat":0.4 },
   "c:salts": { "salty":1 },
   "c:dusts/salt": { "salty":1 },
   "c:foods/salt": { "salty":1 }

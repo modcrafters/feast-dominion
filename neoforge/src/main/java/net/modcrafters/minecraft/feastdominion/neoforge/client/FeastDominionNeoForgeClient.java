@@ -7,6 +7,7 @@ import net.modcrafters.minecraft.feastdominion.client.WellnessHud;
 /*import net.modcrafters.minecraft.feastdominion.client.SaturationHud;
 import net.modcrafters.minecraft.feastdominion.compat.FarmersDelight;
 *///?}
+//? if >=1.21
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -51,7 +52,11 @@ public final class FeastDominionNeoForgeClient {
     }
     *///?}
 
+    //? if >=1.21 {
     private static void renderThirst(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+    //?} else {
+    /*private static void renderThirst(GuiGraphicsExtractor graphics, float partialTick) {
+    *///?}
         Minecraft minecraft = Minecraft.getInstance();
         //? if >=26.1 {
         if (minecraft.gui.hud.isHidden()) {
@@ -75,7 +80,11 @@ public final class FeastDominionNeoForgeClient {
         ThirstHud.draw(graphics, graphics.guiWidth() / 2 + 91, y, player);
     }
 
+    //? if >=1.21 {
     private static void renderWellness(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+    //?} else {
+    /*private static void renderWellness(GuiGraphicsExtractor graphics, float partialTick) {
+    *///?}
         Minecraft minecraft = Minecraft.getInstance();
         //? if >=26.1 {
         if (minecraft.gui.hud.isHidden()) {

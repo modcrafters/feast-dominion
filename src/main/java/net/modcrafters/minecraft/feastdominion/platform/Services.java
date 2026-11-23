@@ -2,6 +2,7 @@ package net.modcrafters.minecraft.feastdominion.platform;
 
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.platform.services.DietStore;
+import net.modcrafters.minecraft.feastdominion.platform.services.FluidContainers;
 import net.modcrafters.minecraft.feastdominion.platform.services.GroupStore;
 import net.modcrafters.minecraft.feastdominion.platform.services.LeanStore;
 import net.modcrafters.minecraft.feastdominion.platform.services.Packets;
@@ -12,6 +13,7 @@ import java.util.ServiceLoader;
 
 public final class Services {
     public static final PlatformHelper PLATFORM = load(PlatformHelper.class);
+    public static final FluidContainers FLUIDS = load(FluidContainers.class);
     public static final ThirstStore THIRST = load(ThirstStore.class);
     public static final Packets PACKETS = load(Packets.class);
     public static final DietStore DIET = load(DietStore.class);

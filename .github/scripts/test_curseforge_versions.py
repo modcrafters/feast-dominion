@@ -18,6 +18,7 @@ TYPES = [
     {"id": 615, "slug": "addons"},
     {"id": 75208, "slug": "environment"},
     {"id": 68441, "slug": "modloader"},
+    {"id": 66006, "slug": "minecraft-1-20"},
     {"id": 77784, "slug": "minecraft-1-21"},
     {"id": 88556, "slug": "minecraft-26-3"},
 ]
@@ -27,6 +28,7 @@ VERSIONS = [
     {"id": 7499, "gameVersionTypeID": 68441, "name": "Fabric"},
     {"id": 10150, "gameVersionTypeID": 68441, "name": "NeoForge"},
     {"id": 11135, "gameVersionTypeID": 2, "name": "Java 21"},
+    {"id": 12060, "gameVersionTypeID": 66006, "name": "1.20.6"},
     {"id": 11779, "gameVersionTypeID": 77784, "name": "1.21.1"},
     {"id": 12735, "gameVersionTypeID": 1, "name": "1.21.1"},
     {"id": 14454, "gameVersionTypeID": 2, "name": "Java 25"},
@@ -37,8 +39,9 @@ VERSIONS = [
 
 
 class CurseForgeVersionsTest(unittest.TestCase):
-    def test_actual_duplicate_names_resolve_for_all_three_jars(self):
+    def test_actual_duplicate_names_resolve_for_every_jar(self):
         for game, loader, java, expected in (
+            ("1.20.6", "NeoForge", "Java 21", [12060, 10150, 99901, 99902, 11135]),
             ("1.21.1", "NeoForge", "Java 21", [11779, 10150, 99901, 99902, 11135]),
             ("26.3", "Fabric", "Java 25", [17045, 7499, 99901, 99902, 14454]),
             ("26.3", "NeoForge", "Java 25", [17045, 10150, 99901, 99902, 14454]),
@@ -89,7 +92,7 @@ class CurseForgeVersionsTest(unittest.TestCase):
                 (root / "versions.json").write_text(json.dumps(versions), encoding="utf-8")
                 (root / "types.json").write_text(json.dumps(TYPES), encoding="utf-8")
                 (root / "notes.md").write_text("- Release notes.\n", encoding="utf-8")
-                for target in ("neoforge-1.21.1", "fabric-26.3", "neoforge-26.3"):
+                for target in ("neoforge-1.20.6", "neoforge-1.21.1", "fabric-26.3", "neoforge-26.3"):
                     (root / f"feast_dominion-{target}-0.0.2-alpha.jar").touch()
                 trace = root / "uploads.txt"
                 env = dict(os.environ, MODRINTH_TOKEN="test", CURSEFORGE_TOKEN="test",
@@ -122,8 +125,9 @@ upload 0.0.2-alpha "$TEST_DIR/notes.md" "$TEST_DIR"
                 if valid:
                     self.assertEqual(result.returncode, 0, result.stderr)
                     uploads = trace.read_text().splitlines()
-                    self.assertEqual(len(uploads), 7)
-                    self.assertEqual(uploads[3:6], [
+                    self.assertEqual(len(uploads), 9)
+                    self.assertEqual(uploads[4:8], [
+                        "CurseForge [12060, 10150, 99901, 99902, 11135]",
                         "CurseForge [11779, 10150, 99901, 99902, 11135]",
                         "CurseForge [17045, 7499, 99901, 99902, 14454]",
                         "CurseForge [17045, 10150, 99901, 99902, 14454]",

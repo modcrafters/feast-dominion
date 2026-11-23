@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.client.SaturationIcons.Mark;
 import net.modcrafters.minecraft.feastdominion.thirst.ThirstIcons;
 import net.minecraft.client.gui.Font;
@@ -19,18 +19,18 @@ public record SaturationTooltip(int nutrition, float saturation, int thirst, flo
     private static final int STEP = 8;
     private static final int ICON = 9;
     private static final int RAISED = 11;
-    private static final Identifier FOOD_FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_food_full");
-    private static final Identifier FOOD_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_food_half");
-    private static final Identifier OUTLINE = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_saturation");
-    private static final Identifier OUTLINE_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_saturation_half");
-    private static final Identifier RAISED_FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_saturation_2");
-    private static final Identifier RAISED_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_saturation_half_2");
-    private static final Identifier THIRST_FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_full");
-    private static final Identifier THIRST_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_half");
-    private static final Identifier QUENCH = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_quench");
-    private static final Identifier QUENCH_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_quench_half");
-    private static final Identifier QUENCH_RAISED = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_quench_2");
-    private static final Identifier QUENCH_RAISED_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_quench_half_2");
+    private static final Identifier FOOD_FULL = FeastIds.of("hud/tooltip_food_full");
+    private static final Identifier FOOD_HALF = FeastIds.of("hud/tooltip_food_half");
+    private static final Identifier OUTLINE = FeastIds.of("hud/tooltip_saturation");
+    private static final Identifier OUTLINE_HALF = FeastIds.of("hud/tooltip_saturation_half");
+    private static final Identifier RAISED_FULL = FeastIds.of("hud/tooltip_saturation_2");
+    private static final Identifier RAISED_HALF = FeastIds.of("hud/tooltip_saturation_half_2");
+    private static final Identifier THIRST_FULL = FeastIds.of("hud/thirst_full");
+    private static final Identifier THIRST_HALF = FeastIds.of("hud/thirst_half");
+    private static final Identifier QUENCH = FeastIds.of("hud/tooltip_quench");
+    private static final Identifier QUENCH_HALF = FeastIds.of("hud/tooltip_quench_half");
+    private static final Identifier QUENCH_RAISED = FeastIds.of("hud/tooltip_quench_2");
+    private static final Identifier QUENCH_RAISED_HALF = FeastIds.of("hud/tooltip_quench_half_2");
 
     private int hungerPad() {
         return this.saturation > 20.0F ? (RAISED - ICON) / 2 : 0;

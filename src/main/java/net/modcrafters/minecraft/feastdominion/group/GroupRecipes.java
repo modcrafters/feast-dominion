@@ -44,10 +44,12 @@ public final class GroupRecipes {
             for (JsonElement element : root.getAsJsonArray("ingredients")) {
                 inputs.add(slot(element));
             }
-            return inputs;
-        }
-        if (root.has("ingredient")) {
+        } else if (root.has("ingredient")) {
             inputs.add(slot(root.get("ingredient")));
+        }
+        // A cheese form names the milk in bucket, beside the rennet in ingredient.
+        if (root.has("bucket")) {
+            inputs.add(slot(root.get("bucket")));
         }
         return inputs;
     }

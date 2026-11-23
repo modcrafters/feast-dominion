@@ -1,5 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.compat;
 
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -8,7 +9,7 @@ import net.minecraft.world.entity.player.Player;
 /** Farmer's Delight paints its own hunger icons while Nourishment is active. */
 public final class FarmersDelight {
     public static final String MOD_ID = "farmersdelight";
-    public static final Identifier NOURISHMENT_LAYER = Identifier.fromNamespaceAndPath(MOD_ID, "nourishment");
+    public static final Identifier NOURISHMENT_LAYER = FeastIds.of(MOD_ID, "nourishment");
     private static final Identifier NOURISHMENT = NOURISHMENT_LAYER;
 
     private FarmersDelight() {

@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.thirst;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -11,7 +11,7 @@ public final class WaterSources {
     /** Biomes whose water is salt. Everything else is fresh. */
     public static final TagKey<Biome> SALT_WATER = TagKey.create(
             Registries.BIOME,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "salt_water")
+            FeastIds.of("salt_water")
     );
 
     private WaterSources() {
