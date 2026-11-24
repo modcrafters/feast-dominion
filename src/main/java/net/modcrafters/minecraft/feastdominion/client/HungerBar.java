@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 //? if >=1.21.6
 import net.minecraft.client.renderer.RenderPipelines;
@@ -12,9 +12,9 @@ public final class HungerBar {
     public static final int ICON = 9;
     public static final int COUNT = 10;
     public static final int WIDTH = (COUNT - 1) * STEP + ICON;
-    private static final Identifier EMPTY = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_food_empty");
-    private static final Identifier HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_food_half");
-    private static final Identifier FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/tooltip_food_full");
+    private static final Identifier EMPTY = FeastIds.of("hud/tooltip_food_empty");
+    private static final Identifier HALF = FeastIds.of("hud/tooltip_food_half");
+    private static final Identifier FULL = FeastIds.of("hud/tooltip_food_full");
 
     private HungerBar() {
     }

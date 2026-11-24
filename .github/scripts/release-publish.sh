@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Publishes the three jars for one tag: NeoForge 1.21.1, Fabric 26.3, and NeoForge 26.3.
+# Publishes the four jars for one tag: NeoForge 1.20.6, NeoForge 1.21.1, Fabric 26.3, and NeoForge 26.3.
 # Each loader gets its own Modrinth version and CurseForge file, so the download button
-# is the jar for that loader. GitHub gets one release with all three attached.
+# is the jar for that loader. GitHub gets one release with all four attached.
 # Usage:
 #   release-publish.sh check-env
 #   release-publish.sh classify <jars-dir> <version>
@@ -28,14 +28,18 @@ check_env() {
   [[ "$CURSEFORGE_PROJECT_ID" =~ ^[0-9]+$ ]] || die "CURSEFORGE_PROJECT_ID should be the number from the CurseForge project page"
 }
 
-# Sets neo_121, fabric_263, and neo_263. A sources jar, or a jar from another version, is ignored.
+# Sets neo_1206, neo_121, fabric_263, and neo_263. A sources jar, or a jar from another version, is ignored.
 classify() {
   local dir=$1 version=$2 jar base
-  neo_121='' fabric_263='' neo_263=''
+  neo_1206='' neo_121='' fabric_263='' neo_263=''
   [[ -d "$dir" ]] || die "No jar directory at ${dir}"
   while IFS= read -r jar; do
     base=$(basename "$jar")
     case "$base" in
+      "feast_dominion-neoforge-1.20.6-${version}.jar")
+        [[ -z "$neo_1206" ]] || die "Two NeoForge 1.20.6 jars named ${base}"
+        neo_1206=$jar
+        ;;
       "feast_dominion-neoforge-1.21.1-${version}.jar")
         [[ -z "$neo_121" ]] || die "Two NeoForge 1.21.1 jars named ${base}"
         neo_121=$jar
@@ -50,6 +54,7 @@ classify() {
         ;;
     esac
   done < <(find "$dir" -type f -name '*.jar' | sort)
+  [[ -n "$neo_1206" ]] || die "Missing feast_dominion-neoforge-1.20.6-${version}.jar"
   [[ -n "$neo_121" ]] || die "Missing feast_dominion-neoforge-1.21.1-${version}.jar"
   [[ -n "$fabric_263" ]] || die "Missing feast_dominion-fabric-26.3-${version}.jar"
   [[ -n "$neo_263" ]] || die "Missing feast_dominion-neoforge-26.3-${version}.jar"
@@ -192,7 +197,7 @@ github_release() {
 upload() {
   local version=$1
   notes=$2
-  local jars=$3 code cf_neo_121 cf_fabric_263 cf_neo_263
+  local jars=$3 code cf_neo_1206 cf_neo_121 cf_fabric_263 cf_neo_263
   check_env
   [[ -f "$notes" ]] || die "No changelog at ${notes}"
   [[ -n "${TAG:-}" ]] || die "TAG is missing"
@@ -225,6 +230,7 @@ upload() {
 
   # Resolve every target before the first upload, so a catalog error cannot
   # leave a release published only on Modrinth.
+  cf_neo_1206=$(curseforge_game_versions 1.20.6 NeoForge "Java 21")
   cf_neo_121=$(curseforge_game_versions 1.21.1 NeoForge "Java 21")
   cf_fabric_263=$(curseforge_game_versions 26.3 Fabric "Java 25")
   cf_neo_263=$(curseforge_game_versions 26.3 NeoForge "Java 25")
@@ -239,15 +245,17 @@ upload() {
     echo "CurseForge file list returned ${code}. A repeated run may upload the same jar again." >&2
   fi
 
+  modrinth_upload "${version}+1.20.6" "Feast Dominion ${version} for NeoForge 1.20.6" neoforge 1.20.6 "$neo_1206"
   modrinth_upload "${version}+1.21.1" "Feast Dominion ${version} for NeoForge 1.21.1" neoforge 1.21.1 "$neo_121"
   modrinth_upload "${version}+26.3+fabric" "Feast Dominion ${version} for Fabric 26.3" fabric 26.3 "$fabric_263"
   modrinth_upload "${version}+26.3+neoforge" "Feast Dominion ${version} for NeoForge 26.3" neoforge 26.3 "$neo_263"
 
+  curseforge_upload "Feast Dominion ${version} for NeoForge 1.20.6" NeoForge "$neo_1206" "$cf_neo_1206"
   curseforge_upload "Feast Dominion ${version} for NeoForge 1.21.1" NeoForge "$neo_121" "$cf_neo_121"
   curseforge_upload "Feast Dominion ${version} for Fabric 26.3" Fabric "$fabric_263" "$cf_fabric_263"
   curseforge_upload "Feast Dominion ${version} for NeoForge 26.3" NeoForge "$neo_263" "$cf_neo_263"
 
-  github_release "$TAG" "$neo_121" "$fabric_263" "$neo_263"
+  github_release "$TAG" "$neo_1206" "$neo_121" "$fabric_263" "$neo_263"
 }
 
 [[ $# -ge 1 ]] || die "Usage: release-publish.sh check-env|classify|upload ..."
@@ -258,7 +266,7 @@ case "$cmd" in
   classify)
     [[ $# -eq 2 ]] || die "Usage: release-publish.sh classify <jars-dir> <version>"
     classify "$1" "$2"
-    printf '%s\n' "$neo_121" "$fabric_263" "$neo_263"
+    printf '%s\n' "$neo_1206" "$neo_121" "$fabric_263" "$neo_263"
     ;;
   upload)
     [[ $# -eq 3 ]] || die "Usage: release-publish.sh upload <version> <changelog> <jars-dir>"

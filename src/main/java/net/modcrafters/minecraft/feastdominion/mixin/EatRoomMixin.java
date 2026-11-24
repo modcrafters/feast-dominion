@@ -18,7 +18,12 @@ public class EatRoomMixin {
      * Nourishment also hooks the start of {@code canEat} and cancels it. Injection points are chosen before any
      * callback is inserted, so a later hook lands behind that cancel. Order 0 is applied first and can refuse first.
      */
+    // Mixin 0.8.5 on 1.20.6 has no order parameter. 1.21's mixin does, and Nourishment needs to lose the race.
+    //? if >=1.21 {
     @Inject(method = "canEat", at = @At("HEAD"), cancellable = true, order = 0)
+    //?} else {
+    /*@Inject(method = "canEat", at = @At("HEAD"), cancellable = true)
+    *///?}
     private void feast$full(boolean always, CallbackInfoReturnable<Boolean> call) {
         FoodData food = ((Player) (Object) this).getFoodData();
         if (SaturationRoom.full(food.getSaturationLevel())) {

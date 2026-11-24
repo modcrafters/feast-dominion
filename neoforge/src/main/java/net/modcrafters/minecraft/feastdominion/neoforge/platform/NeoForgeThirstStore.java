@@ -3,8 +3,11 @@ package net.modcrafters.minecraft.feastdominion.neoforge.platform;
 import net.modcrafters.minecraft.feastdominion.Constants;
 import net.modcrafters.minecraft.feastdominion.platform.services.ThirstStore;
 import net.modcrafters.minecraft.feastdominion.thirst.Thirst;
+import net.modcrafters.minecraft.feastdominion.neoforge.network.ThirstPayload;
 import net.modcrafters.minecraft.feastdominion.thirst.ThirstLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -23,7 +26,9 @@ public class NeoForgeThirstStore implements ThirstStore {
                     .serialize(ThirstLevel.MAP_CODEC)
                     //?} else
                     //.serialize(ThirstLevel.CODEC)
+                    //? if >=1.21 {
                     .sync(ThirstLevel.STREAM_CODEC)
+                    //?}
                     .build()
     );
 
@@ -34,7 +39,15 @@ public class NeoForgeThirstStore implements ThirstStore {
 
     @Override
     public void setLevel(Player player, ThirstLevel level) {
+        if (level.equals(player.getData(THIRST.get()))) {
+            return;
+        }
         player.setData(THIRST.get(), level);
+        //? if <1.21 {
+        /*if (player instanceof ServerPlayer server) {
+            PacketDistributor.sendToPlayer(server, new ThirstPayload(level));
+        }
+        *///?}
     }
 
     @Override

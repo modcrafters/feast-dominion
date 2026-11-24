@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.FeastConfig;
 import net.modcrafters.minecraft.feastdominion.feature.Constitution;
 import net.modcrafters.minecraft.feastdominion.feature.HealthIncreaseFeature;
@@ -24,6 +24,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
@@ -37,15 +39,19 @@ import java.util.Locale;
 
 /** Lean, ten thirst droplets, the food groups, the tastes of the month, and recent meals. */
 public final class WellbeingBoardScreen extends Screen {
-    private static final Identifier THIRST_EMPTY = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_empty");
-    private static final Identifier THIRST_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_half");
-    private static final Identifier THIRST_FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_full");
+    private static final Identifier THIRST_EMPTY = FeastIds.of("hud/thirst_empty");
+    private static final Identifier THIRST_HALF = FeastIds.of("hud/thirst_half");
+    private static final Identifier THIRST_FULL = FeastIds.of("hud/thirst_full");
     private static final int PAPER = 0xFFF3E6C8;
     private static final int EDGE = 0xFF6B4E32;
     private static final int RULE = 0xFFC4AE84;
     private static final int CELL = 0xFFA89474;
     private static final int CELL_EDGE = 0xFF6E5840;
     private static final int INK = 0;
+    /** Dusty rose, same quiet weight as a missed lean. */
+    private static final int TASTE_INK = 0xD4A3A3;
+    /** Sage, so the groups read apart from the tastes. */
+    private static final int GROUP_INK = 0x9BB89A;
     private static final int SLOT_SIZE = 18;
     private static final int COLUMNS = 10;
     private static final int ROW = 14;
@@ -436,7 +442,11 @@ public final class WellbeingBoardScreen extends Screen {
             tastes = tastes == null ? name : tastes.append(Component.literal(", ")).append(name);
         }
         if (tastes != null) {
-            lines.add(tastes.withStyle(ChatFormatting.GRAY));
+            lines.add(tastes.withStyle(Style.EMPTY.withColor(TextColor.fromRgb(TASTE_INK))));
+        }
+        MutableComponent groups = GroupTooltip.line(stack);
+        if (groups != null) {
+            lines.add(groups.withStyle(Style.EMPTY.withColor(TextColor.fromRgb(GROUP_INK))));
         }
         int nutrition = 0;
         if (stack != null && !stack.isEmpty()) {

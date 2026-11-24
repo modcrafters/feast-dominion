@@ -29,10 +29,10 @@ public final class ThirstFood {
         if (thirst == 0 && quench <= 0.0F) {
             return;
         }
-        apply(player, thirst, quench);
-        if (WaterDrink.bucket(stack)) {
-            WaterDrink.empty(player, hand);
+        if (WaterDrink.held(stack) && !WaterDrink.finish(player, hand, stack)) {
+            return;
         }
+        apply(player, thirst, quench);
     }
 
     public static void apply(Player player, int thirst, float quench) {

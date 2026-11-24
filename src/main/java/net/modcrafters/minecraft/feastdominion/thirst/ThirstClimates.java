@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.thirst;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -11,11 +11,11 @@ import net.minecraft.world.level.biome.Biome;
 public final class ThirstClimates {
     public static final TagKey<Biome> WET = TagKey.create(
             Registries.BIOME,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "wet")
+            FeastIds.of("wet")
     );
     public static final TagKey<Biome> DRY = TagKey.create(
             Registries.BIOME,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "dry")
+            FeastIds.of("dry")
     );
 
     private ThirstClimates() {

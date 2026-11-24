@@ -72,6 +72,12 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    // Copied into the Meadow run, together with Architectury. Empty on versions that have no build.
+    meadowRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
 }
 configurations.named('runtimeClasspath') {
     extendsFrom(configurations.localRuntime)
@@ -101,6 +107,12 @@ tasks.register('syncCroptopia', Sync) {
     into(croptopiaMods)
 }
 
+def meadowMods = layout.projectDirectory.dir('runs/client-meadow/mods')
+tasks.register('syncMeadow', Sync) {
+    from(configurations.meadowRuntime)
+    into(meadowMods)
+}
+
 def integrationMods = layout.projectDirectory.dir('runs/client-integrations/mods')
 tasks.register('syncIntegrations', Sync) {
     from(configurations.appleSkinRuntime, configurations.solCarrotRuntime, configurations.delightRuntime, configurations.croptopiaRuntime)
@@ -108,21 +120,32 @@ tasks.register('syncIntegrations', Sync) {
 }
 
 def farmersDelight = findProperty('farmersdelight_version') ?: ''
+def solCarrot = findProperty('solcarrot_file') ?: ''
 def croptopia = findProperty('croptopia_file') ?: ''
 def epherolib = findProperty('epherolib_file') ?: ''
+def meadow = findProperty('meadow_version') ?: ''
+def architectury = findProperty('architectury_version') ?: ''
+def foundation = findProperty('foundation_version') ?: ''
 
 dependencies {
     localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
     compileOnly "maven.modrinth:jade:${jade_version}+neoforge"
     localRuntime "maven.modrinth:jade:${jade_version}+neoforge"
     appleSkinRuntime "maven.modrinth:appleskin:${appleskin_version}"
-    solCarrotRuntime "curse.maven:spice-of-life-carrot-edition-277616:${solcarrot_file}"
+    if (solCarrot) {
+        solCarrotRuntime "curse.maven:spice-of-life-carrot-edition-277616:${solCarrot}"
+    }
     if (farmersDelight) {
         delightRuntime "maven.modrinth:farmers-delight:${farmersDelight}"
     }
     if (croptopia && epherolib) {
         croptopiaRuntime "curse.maven:croptopia-415438:${croptopia}"
         croptopiaRuntime "curse.maven:epherolib-885449:${epherolib}"
+    }
+    if (meadow && architectury && foundation) {
+        meadowRuntime "maven.modrinth:lets-do-meadow:${meadow}"
+        meadowRuntime "maven.modrinth:architectury-api:${architectury}"
+        meadowRuntime "maven.modrinth:lets-do-foundation:${foundation}"
     }
 }
 
@@ -150,11 +173,13 @@ neoForge {
             gameDirectory = this.mkdir(this.file('runs/client-appleskin'))
             taskBefore tasks.named('syncAppleSkin')
         }
-        clientSolCarrot {
-            client()
-            programArguments.addAll '--width', '1920', '--height', '1080'
-            gameDirectory = this.mkdir(this.file('runs/client-solcarrot'))
-            taskBefore tasks.named('syncSolCarrot')
+        if (solCarrot) {
+            clientSolCarrot {
+                client()
+                programArguments.addAll '--width', '1920', '--height', '1080'
+                gameDirectory = this.mkdir(this.file('runs/client-solcarrot'))
+                taskBefore tasks.named('syncSolCarrot')
+            }
         }
         clientIntegrations {
             client()
@@ -176,6 +201,14 @@ neoForge {
                 programArguments.addAll '--width', '1920', '--height', '1080'
                 gameDirectory = this.mkdir(this.file('runs/client-croptopia'))
                 taskBefore tasks.named('syncCroptopia')
+            }
+        }
+        if (meadow && architectury && foundation) {
+            clientMeadow {
+                client()
+                programArguments.addAll '--width', '1920', '--height', '1080'
+                gameDirectory = this.mkdir(this.file('runs/client-meadow'))
+                taskBefore tasks.named('syncMeadow')
             }
         }
         data {
@@ -206,12 +239,18 @@ neoForge {
 // IntelliJ's Application run takes its JVM from the module, which inherits the
 // project JDK (21). 26.3's dev VM args include a flag that JVM rejects, so that
 // button never starts. This run is a Gradle task instead, on the Java toolchain.
-def delightRuns = ['clientAppleSkin', 'clientSolCarrot', 'clientIntegrations']
+def delightRuns = ['clientAppleSkin', 'clientIntegrations']
+if (solCarrot) {
+    delightRuns.add(0, 'clientSolCarrot')
+}
 if (farmersDelight) {
     delightRuns.add('clientDelight')
 }
 if (croptopia && epherolib) {
     delightRuns.add('clientCroptopia')
+}
+if (meadow && architectury && foundation) {
+    delightRuns.add('clientMeadow')
 }
 delightRuns.each { runName ->
     neoForge.runs.named(runName) {
@@ -224,12 +263,18 @@ if (java_version.toInteger() >= 25) {
     def gameLauncher = javaToolchains.launcherFor {
         languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(java_version.toInteger()))
     }
-    def delightTasks = ['runClientAppleSkin', 'runClientSolCarrot', 'runClientIntegrations']
+    def delightTasks = ['runClientAppleSkin', 'runClientIntegrations']
+    if (solCarrot) {
+        delightTasks.add(1, 'runClientSolCarrot')
+    }
     if (farmersDelight) {
         delightTasks.add('runClientDelight')
     }
     if (croptopia && epherolib) {
         delightTasks.add('runClientCroptopia')
+    }
+    if (meadow && architectury && foundation) {
+        delightTasks.add('runClientMeadow')
     }
     delightTasks.each { taskName ->
         tasks.named(taskName) {

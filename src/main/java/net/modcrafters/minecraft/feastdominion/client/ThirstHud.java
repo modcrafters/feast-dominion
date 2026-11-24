@@ -1,6 +1,6 @@
 package net.modcrafters.minecraft.feastdominion.client;
 
-import net.modcrafters.minecraft.feastdominion.Constants;
+import net.modcrafters.minecraft.feastdominion.FeastIds;
 import net.modcrafters.minecraft.feastdominion.client.SaturationIcons.Mark;
 import net.modcrafters.minecraft.feastdominion.platform.Services;
 import net.modcrafters.minecraft.feastdominion.thirst.ThirstIcons;
@@ -13,14 +13,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 public final class ThirstHud {
-    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "thirst");
-    private static final Identifier EMPTY = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_empty");
-    private static final Identifier HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_half");
-    private static final Identifier FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/thirst_full");
-    private static final Identifier QUENCH_FULL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_full");
-    private static final Identifier QUENCH_HALF = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_half");
-    private static final Identifier QUENCH_FULL_OVER = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_full_2");
-    private static final Identifier QUENCH_HALF_OVER = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hud/quench_half_2");
+    public static final Identifier ID = FeastIds.of("thirst");
+    private static final Identifier EMPTY = FeastIds.of("hud/thirst_empty");
+    private static final Identifier HALF = FeastIds.of("hud/thirst_half");
+    private static final Identifier FULL = FeastIds.of("hud/thirst_full");
+    private static final Identifier QUENCH_FULL = FeastIds.of("hud/quench_full");
+    private static final Identifier QUENCH_HALF = FeastIds.of("hud/quench_half");
+    private static final Identifier QUENCH_FULL_OVER = FeastIds.of("hud/quench_full_2");
+    private static final Identifier QUENCH_HALF_OVER = FeastIds.of("hud/quench_half_2");
     public static final int ROW = 10;
 
     private ThirstHud() {
